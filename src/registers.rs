@@ -67,12 +67,30 @@ impl Register {
     }
     
     pub fn from_index(index: u8) -> Result<Register, RegisterError> {
-        todo!()
+        match index {
+            0 => Ok(Register::V0),
+            1 => Ok(Register::V1),
+            2 => Ok(Register::V2),
+            3 => Ok(Register::V3),
+            4 => Ok(Register::V4),
+            5 => Ok(Register::V5),
+            6 => Ok(Register::V6),
+            7 => Ok(Register::V7),
+            8 => Ok(Register::V8),
+            9 => Ok(Register::V9),
+            10 => Ok(Register::VA),
+            11 => Ok(Register::VB),
+            12 => Ok(Register::VC),
+            13 => Ok(Register::VD),
+            14 => Ok(Register::VE),
+            15 => Ok(Register::VF),
+            _ => Err(RegisterError::InvalidIndex(index)),
+        }
     }
 }
 
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RegisterError {
-    InvalidRegister(u8),
+    InvalidIndex(u8),
 }
