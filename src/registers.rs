@@ -25,7 +25,7 @@ impl Registers {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-enum Register {
+pub enum Register {
     V0,
     V1,
     V2,
