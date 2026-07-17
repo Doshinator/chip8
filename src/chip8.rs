@@ -1,4 +1,4 @@
-
+use crate::{instruction::Instruction, registers::Register};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -34,6 +34,7 @@ impl Chip8 {
         }
     }
 
+    // fetch op code
     fn fetch(&mut self) -> u16 {
         let high_byte = self.memory[self.pc as usize] as u16;
         let low_byte = self.memory[(self.pc + 1) as usize] as u16;
