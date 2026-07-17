@@ -1,6 +1,6 @@
 const NUM_REGS: usize = 16;
 
-struct Registers {
+pub struct Registers {
     values: [u8; NUM_REGS],
 }
 

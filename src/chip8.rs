@@ -1,4 +1,5 @@
-use crate::{instruction::Instruction, registers::Register};
+use crate::{registers::Registers, stack::Stack};
+
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
