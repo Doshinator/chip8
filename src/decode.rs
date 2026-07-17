@@ -5,17 +5,15 @@ pub fn decode(opcode: u16) -> Instruction {
     let instruction = (opcode >> 12) as u8;
 
     // extract register
-    let register = ((opcode >> 8) as u8) & (0x0F);
+    let register: u8 = ((opcode >> 8) as u8) & (0x0F);
 
     // extract value
     let value = (opcode & 0x00FF) as u8;
 
     match instruction {
         6 => {
-            let register = match register {
-                5 => V5,
-                _ => panic!()  
-            };
+            let register = Register::from_index(register)?;
+            
             Instruction::LoadImmediate {
                 register, 
                 value 

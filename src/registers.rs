@@ -45,7 +45,7 @@ pub enum Register {
 }
 
 impl Register {
-    fn index(&self) -> usize {
+    pub fn index(&self) -> usize {
         match self {
             Register::V0 => 0,
             Register::V1 => 1,
@@ -65,4 +65,14 @@ impl Register {
             Register::VF => 15,
         }
     }
+    
+    pub fn from_index(index: u8) -> Result<Register, RegisterError> {
+        todo!()
+    }
+}
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RegisterError {
+    InvalidRegister(u8),
 }
