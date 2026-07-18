@@ -1,4 +1,4 @@
-use crate::{instruction::Instruction::{self, LoadImmediate}, registers::Registers, stack::Stack};
+use crate::{decode::decode, instruction::Instruction::{self, LoadImmediate}, registers::{RegisterError, Registers}, stack::Stack};
 
 
 const RAM_SIZE: usize = 4096;
@@ -47,6 +47,7 @@ impl Chip8 {
         op
     }
 
+    // execute instructions
     fn execute(&mut self, instruction: Instruction) {
         match instruction {
             LoadImmediate { register, value } => {
@@ -56,7 +57,10 @@ impl Chip8 {
         }
     }
 
-    pub fn tick(&mut self) -> Result<(), &'static str> {
+    pub fn tick(&mut self) -> Result<(), RegisterError> {
+        let opcode = self.fetch();
+        let instruction = decode(opcode)?;
+        self.execute(instruction);
         
         Ok(())
     }
