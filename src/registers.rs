@@ -94,3 +94,13 @@ impl Register {
 pub enum RegisterError {
     InvalidIndex(u8),
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn from_index_returns_v0() {
+        
+    }
+}
