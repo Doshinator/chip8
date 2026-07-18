@@ -1,4 +1,4 @@
-use crate::{registers::Registers, stack::Stack};
+use crate::{instruction::Instruction, registers::Registers, stack::Stack};
 
 
 const RAM_SIZE: usize = 4096;
@@ -45,5 +45,9 @@ impl Chip8 {
         self.pc += 2;
 
         op
+    }
+
+    fn execute(&mut self, instruction: Instruction) {
+        
     }
 }
