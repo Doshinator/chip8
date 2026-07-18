@@ -55,4 +55,9 @@ impl Chip8 {
             _ => panic!()
         }
     }
+
+    pub fn tick(&mut self) -> Result<(), &'static str> {
+        
+        Ok(())
+    }
 }
