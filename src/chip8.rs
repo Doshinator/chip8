@@ -1,4 +1,4 @@
-use crate::{instruction::Instruction, registers::Registers, stack::Stack};
+use crate::{instruction::Instruction::{self, LoadImmediate}, registers::Registers, stack::Stack};
 
 
 const RAM_SIZE: usize = 4096;
@@ -48,6 +48,11 @@ impl Chip8 {
     }
 
     fn execute(&mut self, instruction: Instruction) {
-        
+        match instruction {
+            LoadImmediate { register, value } => {
+                self.registers.set(register, value);
+            },
+            _ => panic!()
+        }
     }
 }

@@ -11,16 +11,16 @@ impl Registers {
         }
     }
 
-    fn get(&self, register: Register) -> u8 {
+    pub fn get(&self, register: Register) -> u8 {
         self.values[register.index()]
     }
     
-    fn set(
+    pub fn set(
         &mut self,
         register: Register,
-        val: u8,
+        value: u8,
     ) {
-        self.values[register.index()] = val;
+        self.values[register.index()] = value;
     }
 }
 
