@@ -3,6 +3,7 @@ use crate::registers::Register;
 /**
  * Standard Chip-8 Instructions
  */
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Instruction {
     // Clear display - 00E0
     ClearDisplay,

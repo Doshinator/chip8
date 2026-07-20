@@ -15,3 +15,20 @@ pub fn decode(opcode: u16) -> Result<Instruction, RegisterError> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn decode_load_immediate() {
+        let instruction = decode(0x6A05).unwrap();
+        assert_eq!(
+            instruction,
+            Instruction::LoadImmediate {
+                register: Register::VA,
+                value: 5,
+            }
+        );
+    }
+}
