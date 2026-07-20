@@ -65,3 +65,22 @@ impl Chip8 {
         Ok(())
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use crate::chip8::Chip8;
+
+    #[test]
+    fn fetch_reads_two_bytes() {
+        let mut cpu = Chip8::new();
+        
+        cpu.memory[0x200] = 0xAB;
+        cpu.memory[0x201] = 0xCD;
+
+        let opcode = cpu.fetch();
+
+        assert_eq!(0xABCD, opcode);
+        assert_eq!(cpu.pc, 0x202);
+    }
+}
