@@ -5,13 +5,13 @@ const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
     memory: [u8; RAM_SIZE],
     registers: Registers,
-    stack: Stack,
+    // stack: Stack,
 
-    display: Display,
-    keypad: Keypad,
+    // display: Display,
+    // keypad: Keypad,
 
-    display_timer: Timer,
-    sound_timer: Timer,
+    // display_timer: Timer,
+    // sound_timer: Timer,
 
     pc: u16,
     index: u16,
@@ -23,12 +23,12 @@ impl Chip8 {
             memory: [0; RAM_SIZE],
             registers: Registers::new(),
             
-            stack: Stack::new(),
-            display: Display::new(),
-            keypad: Keypad::new(),
+            // stack: Stack::new(),
+            // display: Display::new(),
+            // keypad: Keypad::new(),
 
-            display_timer: Time::new(),
-            sound_timer: Time::new(),
+            // display_timer: Time::new(),
+            // sound_timer: Time::new(),
             
             pc: 0x200,
             index: 0,
@@ -61,7 +61,7 @@ impl Chip8 {
         let opcode = self.fetch();
         let instruction = decode(opcode)?;
         self.execute(instruction);
-        
+
         Ok(())
     }
 }

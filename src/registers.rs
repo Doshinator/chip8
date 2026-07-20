@@ -5,7 +5,7 @@ pub struct Registers {
 }
 
 impl Registers {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             values: [0; NUM_REGS],
         }
@@ -95,12 +95,50 @@ pub enum RegisterError {
     InvalidIndex(u8),
 }
 
+
+/**
+ * 
+ * TESTS
+ * 
+ */
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn from_index_returns_v0() {
-        
+        let register = Register::from_index(0).unwrap();
+        assert_eq!(Register::V0, register)
     }
+
+    #[test]
+    fn from_index_returns_vf() {
+        let register = Register::from_index(15).unwrap();
+        assert_eq!(register, Register::VF);
+    }
+    
+    #[test]
+    fn invalid_register_returns_error() {
+        let register = Register::from_index(99);
+        assert_eq!(
+            Err(RegisterError::InvalidIndex(99)),
+            register
+        )
+    }
+
+    #[test]
+    fn set_updates_register_value() {
+        let mut registers = Registers::new();
+        let value: u8 = 24;
+        let register = Register::V5;
+
+        registers.set(register, value);
+
+        assert_eq!(
+            value, 
+            registers.get(register)
+        )
+    }
+    
 }
