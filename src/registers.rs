@@ -98,7 +98,7 @@ pub enum RegisterError {
 
 /**
  * 
- * TESTS
+ * REGISTER TEST
  * 
  */
 

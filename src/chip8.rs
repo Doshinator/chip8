@@ -67,6 +67,12 @@ impl Chip8 {
 }
 
 
+/**
+ * 
+ * CHIP8 TEST
+ * 
+ */
+
 #[cfg(test)]
 mod tests {
     use crate::registers::Register;
@@ -112,6 +118,7 @@ mod tests {
         assert_eq!(
             cpu.registers.get(Register::VA),
             5
-        )
+        );
+        assert_eq!(cpu.pc, 0x202);
     }
 }

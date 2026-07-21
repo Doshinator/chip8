@@ -16,6 +16,12 @@ pub fn decode(opcode: u16) -> Result<Instruction, RegisterError> {
     }
 }
 
+/**
+ * 
+ * DECODE TEST
+ * 
+ */
+
 #[cfg(test)]
 mod tests {
     use super::*;
