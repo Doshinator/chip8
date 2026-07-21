@@ -100,4 +100,18 @@ mod tests {
             55
         )
     }
+
+    #[test]
+    fn tick_executes_instruction() {
+        let mut cpu = Chip8::new();
+        cpu.memory[0x200] = 0x6A;
+        cpu.memory[0x201] = 0x05;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(
+            cpu.registers.get(Register::VA),
+            5
+        )
+    }
 }
