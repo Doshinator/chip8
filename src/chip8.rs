@@ -69,7 +69,8 @@ impl Chip8 {
 
 #[cfg(test)]
 mod tests {
-    use crate::chip8::Chip8;
+    use crate::registers::Register;
+    use super::*;
 
     #[test]
     fn fetch_reads_two_bytes() {
@@ -82,5 +83,21 @@ mod tests {
 
         assert_eq!(0xABCD, opcode);
         assert_eq!(cpu.pc, 0x202);
+    }
+
+    #[test]
+    fn execute_load_immediate() {
+        let mut cpu = Chip8::new();
+        let instruction_load_immediate = Instruction::LoadImmediate { 
+            register: Register::VA, 
+            value: 55,
+        };
+
+        cpu.execute(instruction_load_immediate);
+
+        assert_eq!(
+            cpu.registers.get(Register::VA),
+            55
+        )
     }
 }

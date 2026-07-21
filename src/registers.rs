@@ -140,5 +140,4 @@ mod tests {
             registers.get(register)
         )
     }
-    
 }
