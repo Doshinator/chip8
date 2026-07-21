@@ -2,17 +2,20 @@ use crate::{instruction::Instruction, registers::{Register::{self}, RegisterErro
 
 pub fn decode(opcode: u16) -> Result<Instruction, RegisterError> {
     let instruction = (opcode >> 12) as u8;
-    
 
     match instruction {
         1 => {
             let address = opcode & 0x0FFF;
             Ok(Instruction::Jump { address })
         },
+        2 => {
+            let address = opcode & 0x0FFF;
+            Ok(Instruction::Call { address })
+        },
         6 => {
             let register_index = ((opcode >> 8) as u8) & (0x0F);
             let value = (opcode & 0x00FF) as u8;
-            
+
             let register = Register::from_index(register_index)?;
             Ok(Instruction::LoadImmediate { register, value })
         }

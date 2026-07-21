@@ -1,4 +1,4 @@
-use crate::{decode::decode, instruction::Instruction::{self, Jump, LoadImmediate}, registers::{RegisterError, Registers}, stack::Stack};
+use crate::{decode::decode, instruction::Instruction::{self, Call, Jump, LoadImmediate}, registers::{RegisterError, Registers}, stack::Stack};
 
 
 const RAM_SIZE: usize = 4096;
@@ -50,6 +50,9 @@ impl Chip8 {
     // execute instructions
     fn execute(&mut self, instruction: Instruction) {
         match instruction {
+            Call { address } => {
+                todo!()
+            },
             Jump { address } => {
                 self.pc = address;
             },
