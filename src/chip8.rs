@@ -1,5 +1,4 @@
-use crate::{decode::decode, instruction::Instruction::{self, Call, Jump, LoadImmediate}, registers::{RegisterError, Registers}, stack::{Stack, StackError}};
-
+use crate::{decode::{DecodeError, decode}, instruction::Instruction::{self, Call, ClearDisplay, Jump, LoadImmediate, Return}, registers::{RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -50,12 +49,18 @@ impl Chip8 {
     // execute instructions
     fn execute(&mut self, instruction: Instruction) -> Result<(), Chip8Error> {
         match instruction {
-            Call { address } => {
-                self.stack.push(self.pc)?;
+            Return => { 
+                let address = self.stack.pop()?;
                 self.pc = address;
                 Ok(())
             },
+            ClearDisplay => { todo!() },
             Jump { address } => {
+                self.pc = address;
+                Ok(())
+            },
+            Call { address } => {
+                self.stack.push(self.pc)?;
                 self.pc = address;
                 Ok(())
             },
@@ -63,7 +68,7 @@ impl Chip8 {
                 self.registers.set(register, value);
                 Ok(())
             },
-            _ => Err(Chip8Error::UnsupportedInstruction)
+            
         }
     }
 
@@ -83,7 +88,7 @@ impl Chip8 {
 pub enum Chip8Error {
     Register(RegisterError),
     Stack(StackError),
-    UnsupportedInstruction,
+    Decode(DecodeError),
 }
 
 impl From<RegisterError> for Chip8Error {
@@ -95,6 +100,12 @@ impl From<RegisterError> for Chip8Error {
 impl From<StackError> for Chip8Error {
     fn from(error: StackError) -> Self {
         Chip8Error::Stack(error)
+    }
+}
+
+impl From<DecodeError> for Chip8Error {
+    fn from(error: DecodeError) -> Self {
+        Chip8Error::Decode(error)
     }
 }
 
@@ -137,23 +148,13 @@ mod tests {
             55
         )
     }
+}
 
-    #[test]
-    fn tick_executes_instruction() {
-        let mut cpu = Chip8::new();
-        cpu.memory[0x200] = 0x6A;
-        cpu.memory[0x201] = 0x05;
+#[cfg(test)]
+mod chip8_execute_tests {
+    use super::*;
 
-        cpu.tick().unwrap();
-
-        assert_eq!(
-            cpu.registers.get(Register::VA),
-            5
-        );
-        assert_eq!(cpu.pc, 0x202);
-    }
-
-    #[test]
+     #[test]
     fn execute_jump() {
         let mut cpu = Chip8::new();
     
@@ -176,5 +177,70 @@ mod tests {
             cpu.stack.pop().unwrap(),
             0x202
         );
+    }
+    
+    #[test]
+    fn execute_return() {
+        let mut cpu = Chip8::new();
+
+        cpu.stack.push(0x202).unwrap();
+
+        cpu.execute(Instruction::Return).unwrap();
+
+        assert_eq!(cpu.pc, 0x202);
+    }
+}
+
+#[cfg(test)]
+mod chip8_tick_tests {
+    use crate::registers::Register;
+    use super::*;
+    
+    #[test]
+    fn tick_executes_instruction() {
+        let mut cpu = Chip8::new();
+        cpu.memory[0x200] = 0x6A;
+        cpu.memory[0x201] = 0x05;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(
+            cpu.registers.get(Register::VA),
+            5
+        );
+        assert_eq!(cpu.pc, 0x202);
+    }
+
+    #[test]
+    fn tick_executes_call() {
+        let mut cpu = Chip8::new();
+
+        // 0x200:
+        // CALL 0x300
+        cpu.memory[0x200] = 0x23;
+        cpu.memory[0x201] = 0x00;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(cpu.pc, 0x300);
+
+        assert_eq!(
+            cpu.stack.pop().unwrap(),
+            0x202
+        );
+    }
+
+    #[test]
+    fn tick_executes_return() {
+        let mut cpu = Chip8::new();
+
+        cpu.stack.push(0x202).unwrap();
+
+        // 00EE
+        cpu.memory[0x200] = 0x00;
+        cpu.memory[0x201] = 0xEE;
+
+        cpu.tick().unwrap();
+        assert_eq!(cpu.pc, 0x202);
     }
 }
