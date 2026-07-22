@@ -89,7 +89,9 @@ impl Register {
     }
 }
 
-
+/**
+ * Custom Error
+ */
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RegisterError {
     InvalidIndex(u8),

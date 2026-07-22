@@ -1,6 +1,6 @@
 use crate::{instruction::Instruction, registers::{Register::{self}, RegisterError}};
 
-pub fn decode(opcode: u16) -> Result<Instruction, RegisterError> {
+pub fn decode(opcode: u16) -> Result<Instruction, RegisterError> { // change to decode error later
     let instruction = (opcode >> 12) as u8;
 
     match instruction {

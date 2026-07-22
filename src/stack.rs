@@ -38,6 +38,9 @@ impl Stack {
     }
 }
 
+/**
+ * Custom Error
+ */
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum StackError {
     Overflow { capacity: usize, attempted: usize },
