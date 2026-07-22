@@ -5,7 +5,7 @@ const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
     memory: [u8; RAM_SIZE],
     registers: Registers,
-    // stack: Stack,
+    stack: Stack,
 
     // display: Display,
     // keypad: Keypad,
@@ -23,7 +23,7 @@ impl Chip8 {
             memory: [0; RAM_SIZE],
             registers: Registers::new(),
             
-            // stack: Stack::new(),
+            stack: Stack::new(),
             // display: Display::new(),
             // keypad: Keypad::new(),
 
