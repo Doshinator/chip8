@@ -1,3 +1,4 @@
+//!chip8.rs
 use core::fmt;
 
 use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, Call, ClearDisplay, Jump, LoadImmediate, Return}, registers::{RegisterError, Registers}, stack::{Stack, StackError}};
@@ -56,7 +57,10 @@ impl Chip8 {
                 self.pc = address;
                 Ok(())
             },
-            ClearDisplay => { todo!() },
+            ClearDisplay => { 
+                self.display.clear();
+                Ok(())
+            },
             Jump { address } => {
                 self.pc = address;
                 Ok(())
@@ -217,7 +221,7 @@ mod chip8_execute_tests {
 
 #[cfg(test)]
 mod chip8_tick_tests {
-    use crate::registers::Register;
+    use crate::{display::{HEIGHT, WIDTH}, registers::Register};
     use super::*;
     
     #[test]
@@ -285,5 +289,21 @@ mod chip8_tick_tests {
         cpu.tick().unwrap();
 
         assert_eq!(cpu.pc, 0x202);
+    }
+
+    #[test]
+    fn tick_clears_display() {
+        let mut cpu = Chip8::new();
+
+        cpu.memory[0x200] = 0x00;
+        cpu.memory[0x201] = 0xE0;
+
+
+        cpu.tick().unwrap();
+
+        assert_eq!(
+            [[false; WIDTH]; HEIGHT],
+            cpu.display.pixels
+        )
     }
 }
