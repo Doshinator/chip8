@@ -84,7 +84,9 @@ impl Chip8 {
 }
 
 /**
+ * 
  * Custom Error
+ * 
  */
 #[derive(Debug)]
 pub enum Chip8Error {
@@ -263,6 +265,25 @@ mod chip8_tick_tests {
         cpu.memory[0x201] = 0xEE;
 
         cpu.tick().unwrap();
+        assert_eq!(cpu.pc, 0x202);
+    }
+
+    #[test]
+    fn call_then_return_resumes_execution() {
+        let mut cpu = Chip8::new();
+
+        cpu.memory[0x200] = 0x23;
+        cpu.memory[0x201] = 0x00; // CALL 0x300
+
+        cpu.memory[0x300] = 0x00;
+        cpu.memory[0x301] = 0xEE; // RETURN
+
+        cpu.tick().unwrap();
+
+        assert_eq!(cpu.pc, 0x300);
+
+        cpu.tick().unwrap();
+
         assert_eq!(cpu.pc, 0x202);
     }
 }
