@@ -1,6 +1,6 @@
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, instruction::Instruction::{self, Call, ClearDisplay, Jump, LoadImmediate, Return}, registers::{RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, Call, ClearDisplay, Jump, LoadImmediate, Return}, registers::{RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -8,7 +8,7 @@ pub struct Chip8 {
     registers: Registers,
     stack: Stack,
 
-    // display: Display,
+    display: Display,
     // keypad: Keypad,
 
     // display_timer: Timer,
@@ -25,7 +25,7 @@ impl Chip8 {
             registers: Registers::new(),
             
             stack: Stack::new(),
-            // display: Display::new(),
+            display: Display::new(),
             // keypad: Keypad::new(),
 
             // display_timer: Time::new(),
