@@ -1,3 +1,5 @@
+use core::fmt;
+
 use crate::{instruction::{Instruction}, registers::Register::{self}};
 
 pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
@@ -5,11 +7,9 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
 
     match instruction {
         0 => {
-            let low_byte = opcode & 0x00FF;
-
-            match low_byte {
-                0x00E0 => Ok(Instruction::ClearDisplay),
-                0x00EE => Ok(Instruction::Return),
+            match opcode & 0x00FF {
+                0xE0 => Ok(Instruction::ClearDisplay),
+                0xEE => Ok(Instruction::Return),
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }
         },
@@ -42,6 +42,17 @@ pub enum DecodeError {
     // Opcode does not map to a CHIP-8 instruction
     UnsupportedInstruction(u16),
 }
+
+impl fmt::Display for DecodeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            DecodeError::UnsupportedInstruction(op) => {
+                write!(f, "unsupported opcode: {op:#06X}")
+            }
+        }
+    }
+}
+impl std::error::Error for DecodeError {}
 
 /**
  * 

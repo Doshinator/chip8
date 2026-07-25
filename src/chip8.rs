@@ -1,3 +1,5 @@
+use core::fmt;
+
 use crate::{decode::{DecodeError, decode}, instruction::Instruction::{self, Call, ClearDisplay, Jump, LoadImmediate, Return}, registers::{RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
@@ -106,6 +108,25 @@ impl From<StackError> for Chip8Error {
 impl From<DecodeError> for Chip8Error {
     fn from(error: DecodeError) -> Self {
         Chip8Error::Decode(error)
+    }
+}
+
+impl fmt::Display for Chip8Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Chip8Error::Register(e) => write!(f, "register error: {e}"),
+            Chip8Error::Stack(e)    => write!(f, "stack error: {e}"),
+            Chip8Error::Decode(e)   => write!(f, "decode error: {e}"),
+        }
+    }
+}
+impl std::error::Error for Chip8Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Chip8Error::Register(e) => Some(e),
+            Chip8Error::Stack(e)    => Some(e),
+            Chip8Error::Decode(e)   => Some(e),
+        }
     }
 }
 

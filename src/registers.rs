@@ -1,3 +1,5 @@
+use core::fmt;
+
 const NUM_REGS: usize = 16;
 
 pub struct Registers {
@@ -96,6 +98,15 @@ impl Register {
 pub enum RegisterError {
     InvalidIndex(u8),
 }
+
+impl fmt::Display for RegisterError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RegisterError::InvalidIndex(i) => write!(f, "invalid register index: {i} (valid: 0–15)")
+        }
+    }
+}
+impl std::error::Error for RegisterError {}
 
 
 /**
