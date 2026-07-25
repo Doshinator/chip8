@@ -58,6 +58,8 @@ impl fmt::Display for StackError {
     }
 }
 
+impl std::error::Error for StackError {}
+
 /**
  * 
  * STACK TESTS

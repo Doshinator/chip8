@@ -120,6 +120,7 @@ impl fmt::Display for Chip8Error {
         }
     }
 }
+
 impl std::error::Error for Chip8Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
