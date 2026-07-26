@@ -79,15 +79,17 @@ impl Chip8 {
                 self.registers.set(register, curr_val);
                 Ok(())
             },
-            SetVxVy { register_destination, register_source } => {
-                todo!()
+            SetVxVy { vx, vy } => {
+                let src_val = self.registers.get(vy);
+                self.registers.set(vx, src_val);
+                Ok(())
             },
-            AddVxVy { register_destination, register_source } => {
-                let x_val = self.registers.get(register_destination);
-                let y_val = self.registers.get(register_source);
+            AddVxVy { vx, vy } => {
+                let x_val = self.registers.get(vx);
+                let y_val = self.registers.get(vy);
                 
                 let (result, overflowed) = x_val.overflowing_add(y_val);
-                self.registers.set(register_destination, result);
+                self.registers.set(vx, result);
 
                 if overflowed {
                     self.registers.set(Register::VF, 1);
@@ -266,8 +268,8 @@ mod chip8_execute_tests {
         cpu.registers.set(Register::VB, 20);
 
         cpu.execute(AddVxVy {
-            register_destination: Register::VA,
-            register_source: Register::VB,
+            vx: Register::VA,
+            vy: Register::VB,
         })
         .unwrap();
 
@@ -285,8 +287,8 @@ mod chip8_execute_tests {
         cpu.registers.set(src, 10);
 
         cpu.execute(AddVxVy { 
-            register_destination: Register::VA,
-            register_source: Register::VB 
+            vx: Register::VA,
+            vy: Register::VB 
         })
         .unwrap();
         

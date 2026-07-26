@@ -45,18 +45,18 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
 
             match opcode & 0x000F {
                 0 => {
-                    let register_destination = Register::from_index(x).expect("X register must be valid");
-                    let register_source = Register::from_index(y).expect("Y register must be valid");
-                    Ok(Instruction::SetVxVy { register_destination, register_source })
+                    let vx = Register::from_index(x).expect("X register must be valid");
+                    let vy = Register::from_index(y).expect("Y register must be valid");
+                    Ok(Instruction::SetVxVy { vx, vy })
                 },
                 1 => todo!(),
                 2 => todo!(),
                 3 => todo!(),
                 4 => {
-                    let register_destination = Register::from_index(x).expect("X register must be valid");
-                    let register_source = Register::from_index(y).expect("Y register must be valid");
+                    let vx = Register::from_index(x).expect("X register must be valid");
+                    let vy = Register::from_index(y).expect("Y register must be valid");
 
-                    Ok(Instruction::AddVxVy { register_destination,  register_source })
+                    Ok(Instruction::AddVxVy { vx,  vy })
                 },
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }
@@ -135,8 +135,8 @@ mod tests {
         let instruction = decode(0x8AB4).unwrap();
         assert_eq!(
             Instruction::AddVxVy { 
-                register_destination: Register::VA, 
-                register_source: Register::VB 
+                vx: Register::VA, 
+                vy: Register::VB 
             },
             instruction
         )
