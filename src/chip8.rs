@@ -92,8 +92,8 @@ impl Chip8 {
                 else {
                     self.registers.set(Register::VF, 0);
                 }
-                
-                todo!()
+
+                Ok(())
             },
         }
     }
