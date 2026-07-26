@@ -1,7 +1,7 @@
 //!chip8.rs
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, Call, ClearDisplay, Jump, LoadImmediate, Return}, registers::{RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, Call, ClearDisplay, Jump, LoadImmediate, Return}, registers::{RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -74,7 +74,11 @@ impl Chip8 {
                 self.registers.set(register, value);
                 Ok(())
             },
-            
+            AddImmediate { register, value} => {
+                let curr_val = self.registers.get(register).wrapping_add(value);
+                self.registers.set(register, curr_val);
+                Ok(())
+            }
         }
     }
 
@@ -180,6 +184,7 @@ mod tests {
 
 #[cfg(test)]
 mod chip8_execute_tests {
+    use crate::registers::Register;
     use super::*;
 
      #[test]
@@ -216,6 +221,22 @@ mod chip8_execute_tests {
         cpu.execute(Instruction::Return).unwrap();
 
         assert_eq!(cpu.pc, 0x202);
+    }
+
+    #[test]
+    fn execute_add_immedaite() {
+        let mut cpu = Chip8::new();
+        
+        cpu.registers.set(Register::VA, 10);
+        cpu.execute(Instruction::AddImmediate { 
+            register: Register::VA, 
+            value: 255 })
+            .unwrap();
+        
+        assert_eq!(
+            cpu.registers.get(Register::VA),
+            9
+        );
     }
 }
 

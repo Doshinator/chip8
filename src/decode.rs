@@ -1,3 +1,4 @@
+//!decode.rs
 use core::fmt;
 
 use crate::{instruction::{Instruction}, registers::Register::{self}};
@@ -29,6 +30,14 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                 .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
 
             Ok(Instruction::LoadImmediate { register, value })
+        },
+        7 => {
+            let register_index = ((opcode >> 8) as u8) & (0x0F);
+            let register = Register::from_index(register_index)
+                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
+            let value = (opcode & 0x00FF) as u8;
+
+            Ok(Instruction::AddImmediate { register, value })
         }
         _ => Err(DecodeError::UnsupportedInstruction(opcode)),
     }
@@ -85,5 +94,18 @@ mod tests {
                 address: 0x234 
             }
         );
+    }
+
+    #[test]
+    fn decode_add_immedaite() {
+        let instruction = decode(0x7A55).unwrap();
+
+        assert_eq!(
+            Instruction::AddImmediate { 
+                register: Register::VA, 
+                value: 0x55
+            },
+            instruction
+        )
     }
 }
