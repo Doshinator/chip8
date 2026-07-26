@@ -131,7 +131,7 @@ mod tests {
     }
 
     #[test]
-    fn decode_add_vxvy() {
+    fn decode_add_vx_vy() {
         let instruction = decode(0x8AB4).unwrap();
         assert_eq!(
             Instruction::AddVxVy { 
@@ -140,5 +140,17 @@ mod tests {
             },
             instruction
         )
+    }
+
+    #[test]
+    fn decode_set_vx_vy() {
+        let instruction = decode(0x8AB0).unwrap();
+        assert_eq!(
+            Instruction::SetVxVy {
+                vx: Register::VA,
+                vy: Register::VB,
+            },
+            instruction
+        );
     }
 }
