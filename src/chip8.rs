@@ -254,6 +254,42 @@ mod chip8_execute_tests {
             9
         );
     }
+
+    #[test]
+    fn execute_add_vxvy_without_overflow() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 10);
+        cpu.registers.set(Register::VB, 20);
+
+        cpu.execute(AddVxVy {
+            register_destination: Register::VA,
+            register_source: Register::VB,
+        })
+        .unwrap();
+
+        assert_eq!(30, cpu.registers.get(Register::VA));
+        assert_eq!(0, cpu.registers.get(Register::VF));
+    }
+
+    #[test]
+    fn execute_add_vxvy_overflow() {
+        let mut cpu = Chip8::new();
+        let dst = Register::VA;
+        let src = Register::VB;
+
+        cpu.registers.set(dst, 255);
+        cpu.registers.set(src, 10);
+
+        cpu.execute(AddVxVy { 
+            register_destination: Register::VA,
+            register_source: Register::VB 
+        })
+        .unwrap();
+        
+        assert_eq!(9, cpu.registers.get(dst));
+        assert_eq!(1, cpu.registers.get(Register::VF))
+    }
 }
 
 #[cfg(test)]
@@ -343,4 +379,21 @@ mod chip8_tick_tests {
             cpu.display.pixels
         )
     }
+
+    #[test]
+    fn tick_executes_add_vxvy() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 255);
+        cpu.registers.set(Register::VB, 10);
+        cpu.memory[0x200] = 0x8A;
+        cpu.memory[0x201] = 0xB4;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(9, cpu.registers.get(Register::VA));
+        assert_eq!(1, cpu.registers.get(Register::VF));
+        assert_eq!(0x202, cpu.pc);
+    }
+    
 }
