@@ -44,6 +44,11 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             let y = ((opcode >> 4) & 0x0F) as u8;
 
             match opcode & 0x000F {
+                0 => {
+                    let register_destination = Register::from_index(x).expect("X register must be valid");
+                    let register_source = Register::from_index(y).expect("Y register must be valid");
+                    Ok(Instruction::SetVxVy { register_destination, register_source })
+                },
                 1 => todo!(),
                 2 => todo!(),
                 3 => todo!(),
