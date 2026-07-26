@@ -224,7 +224,7 @@ mod chip8_execute_tests {
     }
 
     #[test]
-    fn execute_add_immedaite() {
+    fn execute_add_immediate() {
         let mut cpu = Chip8::new();
         
         cpu.registers.set(Register::VA, 10);
