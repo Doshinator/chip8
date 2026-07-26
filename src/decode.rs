@@ -38,6 +38,23 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             let value = (opcode & 0x00FF) as u8;
 
             Ok(Instruction::AddImmediate { register, value })
+        },
+        8 => {
+            let x = ((opcode >> 8) & 0x0F) as u8;
+            let y = ((opcode >> 4) & 0x0F) as u8;
+
+            match opcode & 0x000F {
+                1 => todo!(),
+                2 => todo!(),
+                3 => todo!(),
+                4 => {
+                    let register_destination = Register::from_index(x).expect("X register must be valid");
+                    let register_source = Register::from_index(y).expect("Y register must be valid");
+
+                    Ok(Instruction::AddVxVy { register_destination,  register_source })
+                },
+                _ => Err(DecodeError::UnsupportedInstruction(opcode))
+            }
         }
         _ => Err(DecodeError::UnsupportedInstruction(opcode)),
     }
@@ -99,11 +116,22 @@ mod tests {
     #[test]
     fn decode_add_immedaite() {
         let instruction = decode(0x7A55).unwrap();
-
         assert_eq!(
             Instruction::AddImmediate { 
                 register: Register::VA, 
                 value: 0x55
+            },
+            instruction
+        )
+    }
+
+    #[test]
+    fn decode_add_vxvy() {
+        let instruction = decode(0x8AB4).unwrap();
+        assert_eq!(
+            Instruction::AddVxVy { 
+                register_destination: Register::VA, 
+                register_source: Register::VB 
             },
             instruction
         )
