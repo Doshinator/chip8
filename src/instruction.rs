@@ -71,7 +71,14 @@ pub enum Instruction {
         vy: Register,
     },
 
+    // 8xy6 - SHR Vx {, Vy}; Set Vx = Vx SHR 1.
     ShrVx {
         vx: Register,
+    },
+
+    // 8xy7 - SUBN Vx, Vy; Set Vx = Vy - Vx, set VF = NOT borrow.
+    SubnVxVy {
+        vx: Register,
+        vy: Register,
     }
 }

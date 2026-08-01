@@ -49,8 +49,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                 4 => Ok(Instruction::AddVxVy { vx,  vy }),
                 5 => Ok(Instruction::SubVxVy { vx, vy }),
                 6 => Ok(Instruction::ShrVx { vx }),
-                7 => todo!(),
-                E => todo!(),
+                7 => Ok(Instruction::SubnVxVy { vx, vy }),
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }
         }

@@ -1,7 +1,7 @@
 //!chip8.rs
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy, ShrVx, SubVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy, ShrVx, SubVxVy, SubnVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -142,6 +142,22 @@ impl Chip8 {
 
                 self.registers.set(vx, result);
                 self.registers.set(Register::VF, least_significant_bit);
+
+                Ok(())
+            },
+            SubnVxVy { vx, vy } => {
+                let vx_val = self.registers.get(vx);
+                let vy_val = self.registers.get(vy);
+                let (result, borrowed) = vy_val.overflowing_sub(vx_val);
+
+                self.registers.set(vx, result);
+
+                if !borrowed {
+                    self.registers.set(Register::VF, 1);
+                }
+                else {
+                    self.registers.set(Register::VF, 0);
+                }
 
                 Ok(())
             }
@@ -463,7 +479,7 @@ mod chip8_execute_tests {
     }
 
     #[test]
-    fn execute_shr_vx_vy_lsb_zero() {
+    fn execute_shr_vx_lsb_zero() {
         let mut cpu = Chip8::new();
 
         cpu.registers.set(Register::VA, 0b1010_0000);
@@ -485,7 +501,7 @@ mod chip8_execute_tests {
     }
 
     #[test]
-    fn execute_shr_vx_vy_lsb_one() {
+    fn execute_shr_vx_lsb_one() {
         let mut cpu = Chip8::new();
 
         cpu.registers.set(Register::VA, 0b1010_0001);
@@ -504,6 +520,54 @@ mod chip8_execute_tests {
             1,
             cpu.registers.get(Register::VF)
         );
+    }
+
+    #[test]
+    fn execute_subn_vx_vy_without_borrow() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 5);
+        cpu.registers.set(Register::VB, 20);
+
+        cpu.execute(SubnVxVy {
+            vx: Register::VA,
+            vy: Register::VB,
+        }).unwrap();
+      
+        assert_eq!(15, cpu.registers.get(Register::VA));
+        assert_eq!(1, cpu.registers.get(Register::VF));
+    }
+
+    #[test]
+    fn execute_subn_vx_vy_with_borrow() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 20);
+        cpu.registers.set(Register::VB, 5);
+
+        cpu.execute(SubnVxVy {
+            vx: Register::VA,
+            vy: Register::VB,
+        }).unwrap();
+      
+        assert_eq!(241, cpu.registers.get(Register::VA));
+        assert_eq!(0, cpu.registers.get(Register::VF));
+    }
+
+    #[test]
+    fn execute_subn_vx_vy_equal_values() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 20);
+        cpu.registers.set(Register::VB, 20);
+
+        cpu.execute(SubnVxVy {
+            vx: Register::VA,
+            vy: Register::VB,
+        }).unwrap();
+
+        assert_eq!(0, cpu.registers.get(Register::VA));
+        assert_eq!(1, cpu.registers.get(Register::VF));
     }
 }
 
@@ -678,7 +742,7 @@ mod chip8_tick_tests {
     }
 
     #[test]
-    fn tick_executes_shr_vx_vy() {
+    fn tick_executes_shr_vx() {
         let mut cpu = Chip8::new();
 
         // 8AB6 = VA >>= 1, VF = least significant bit
