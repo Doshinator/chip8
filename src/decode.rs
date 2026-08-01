@@ -52,14 +52,13 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                 1 => {
                     let vx = Register::from_index(x).expect("X register must be valid");
                     let vy = Register::from_index(y).expect("Y register must be valid");
-                    Ok(Instruction::OrVxVy {vx, vy })
+                    Ok(Instruction::OrVxVy { vx, vy })
                 },
                 2 => todo!(),
                 3 => todo!(),
                 4 => {
                     let vx = Register::from_index(x).expect("X register must be valid");
                     let vy = Register::from_index(y).expect("Y register must be valid");
-
                     Ok(Instruction::AddVxVy { vx,  vy })
                 },
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
@@ -151,6 +150,18 @@ mod tests {
         let instruction = decode(0x8AB0).unwrap();
         assert_eq!(
             Instruction::SetVxVy {
+                vx: Register::VA,
+                vy: Register::VB,
+            },
+            instruction
+        );
+    }
+
+    #[test]
+    fn decode_or_vx_vy() {
+        let instruction = decode(0x8AB1).unwrap();
+        assert_eq!(
+            Instruction::OrVxVy { 
                 vx: Register::VA,
                 vy: Register::VB,
             },

@@ -1,7 +1,7 @@
 //!chip8.rs
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, Call, ClearDisplay, Jump, LoadImmediate, Return, SetVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -85,10 +85,10 @@ impl Chip8 {
                 Ok(())
             },
             AddVxVy { vx, vy } => {
-                let x_val = self.registers.get(vx);
-                let y_val = self.registers.get(vy);
+                let vx_val = self.registers.get(vx);
+                let vy_val = self.registers.get(vy);
                 
-                let (result, overflowed) = x_val.overflowing_add(y_val);
+                let (result, overflowed) = vx_val.overflowing_add(vy_val);
                 self.registers.set(vx, result);
 
                 if overflowed {
@@ -100,6 +100,14 @@ impl Chip8 {
 
                 Ok(())
             },
+            OrVxVy { vx, vy } => {
+                let vx_val = self.registers.get(vx);
+                let vy_val = self.registers.get(vy);
+                
+                self.registers.set(vx, vx_val | vy_val);
+
+                Ok(())
+            }
         }
     }
 
@@ -311,6 +319,25 @@ mod chip8_execute_tests {
 
         assert_eq!(20, cpu.registers.get(Register::VA));
     }
+
+    #[test]
+    fn execute_or_vx_vy() {
+        let mut cpu = Chip8::new();
+        
+        cpu.registers.set(Register::VA, 0b1010_0001);
+        cpu.registers.set(Register::VB, 0b0000_1111);
+
+        cpu.execute(OrVxVy { 
+            vx: Register::VA,
+            vy: Register::VB,
+        })
+        .unwrap();
+
+        assert_eq!(
+            0b1010_1111,
+            cpu.registers.get(Register::VA)
+        )
+    }
 }
 
 #[cfg(test)]
@@ -432,6 +459,22 @@ mod chip8_tick_tests {
 
         assert_eq!(20, cpu.registers.get(Register::VA));
         assert_eq!(20, cpu.registers.get(Register::VB));
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_or_vx_vy() {
+        let mut cpu = Chip8::new();
+        // 8AB1 = V[A] | V[B]
+        cpu.memory[0x200] = 0x8A;
+        cpu.memory[0x201] = 0xB1;
+
+        cpu.registers.set(Register::VA, 0b1010_0001);
+        cpu.registers.set(Register::VB, 0b0000_1111);
+
+        cpu.tick().unwrap();
+
+        assert_eq!(0b1010_1111, cpu.registers.get(Register::VA));
         assert_eq!(0x202, cpu.pc);
     }
 }
