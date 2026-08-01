@@ -530,7 +530,7 @@ mod chip8_tick_tests {
     #[test]
     fn tick_execute_and_vxvy() {
         let mut cpu = Chip8::new();
-        // 8AB1 = V[A] & V[B]
+        // 8AB2 = V[A] & V[B]
         cpu.memory[0x200] = 0x8A;
         cpu.memory[0x201] = 0xB2;
 
@@ -546,7 +546,7 @@ mod chip8_tick_tests {
     #[test]
     fn tick_execute_xor_vxvy() {
         let mut cpu = Chip8::new();
-        // 8AB1 = V[A] ^ V[B]
+        // 8AB3 = V[A] ^ V[B]
         cpu.memory[0x200] = 0x8A;
         cpu.memory[0x201] = 0xB3;
 
