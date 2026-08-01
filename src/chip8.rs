@@ -1,7 +1,7 @@
 //!chip8.rs
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -106,6 +106,12 @@ impl Chip8 {
                 
                 self.registers.set(vx, vx_val | vy_val);
 
+                Ok(())
+            },
+            AndVxVy { vx, vy } => {
+                let vx_val = self.registers.get(vx);
+                let vy_val = self.registers.get(vy);
+                self.registers.set(vx, vx_val & vy_val);
                 Ok(())
             }
         }
