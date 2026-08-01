@@ -1,7 +1,7 @@
 //!decode.rs
 use core::fmt;
 
-use crate::{instruction::{Instruction}, registers::Register::{self}};
+use crate::{decode::DecodeError::UnsupportedInstruction, instruction::Instruction, registers::Register::{self}};
 
 pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
     let instruction = (opcode >> 12) as u8;
@@ -40,32 +40,29 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             Ok(Instruction::AddImmediate { register, value })
         },
         8 => {
-            let x = ((opcode >> 8) & 0x0F) as u8;
-            let y = ((opcode >> 4) & 0x0F) as u8;
-
+            let (vx, vy) = decode_xy_register(opcode)?;
             match opcode & 0x000F {
-                0 => {
-                    let vx = Register::from_index(x).expect("X register must be valid");
-                    let vy = Register::from_index(y).expect("Y register must be valid");
-                    Ok(Instruction::SetVxVy { vx, vy })
-                },
-                1 => {
-                    let vx = Register::from_index(x).expect("X register must be valid");
-                    let vy = Register::from_index(y).expect("Y register must be valid");
-                    Ok(Instruction::OrVxVy { vx, vy })
-                },
-                2 => todo!(),
+                0 => Ok(Instruction::SetVxVy { vx, vy }),
+                1 => Ok(Instruction::OrVxVy { vx, vy }),
+                2 => Ok(Instruction::AndVxVy { vx, vy }),
                 3 => todo!(),
-                4 => {
-                    let vx = Register::from_index(x).expect("X register must be valid");
-                    let vy = Register::from_index(y).expect("Y register must be valid");
-                    Ok(Instruction::AddVxVy { vx,  vy })
-                },
+                4 => Ok(Instruction::AddVxVy { vx,  vy }),
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }
         }
         _ => Err(DecodeError::UnsupportedInstruction(opcode)),
     }
+}
+
+fn decode_xy_register(opcode: u16) -> Result<(Register, Register), DecodeError> {
+    let x = ((opcode >> 8) & 0x0F) as u8;
+    let y = ((opcode >> 4) & 0x0F) as u8;
+    let vx = Register::from_index(x)
+        .map_err(|_| UnsupportedInstruction(opcode))?;
+    let vy = Register::from_index(y)
+        .map_err(|_| UnsupportedInstruction(opcode))?;
+
+    Ok((vx, vy))
 }
 
 /**
