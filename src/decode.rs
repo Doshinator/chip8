@@ -49,7 +49,11 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                     let vy = Register::from_index(y).expect("Y register must be valid");
                     Ok(Instruction::SetVxVy { vx, vy })
                 },
-                1 => todo!(),
+                1 => {
+                    let vx = Register::from_index(x).expect("X register must be valid");
+                    let vy = Register::from_index(y).expect("Y register must be valid");
+                    Ok(Instruction::OrVxVy {vx, vy })
+                },
                 2 => todo!(),
                 3 => todo!(),
                 4 => {
