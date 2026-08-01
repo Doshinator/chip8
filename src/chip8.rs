@@ -1,7 +1,7 @@
 //!chip8.rs
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy, ShrVx, SubVxVy, SubnVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy, ShlVx, ShrVx, SubVxVy, SubnVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -160,7 +160,18 @@ impl Chip8 {
                 }
 
                 Ok(())
-            }
+            },
+            ShlVx { vx } => {
+                let vx_val = self.registers.get(vx);
+
+                let most_significant_bit = vx_val >> 7;
+                let result = vx_val << 1;
+
+                self.registers.set(vx, result);
+                self.registers.set(Register::VF, most_significant_bit);
+
+                Ok(())
+            },
         }
     }
 
@@ -569,6 +580,50 @@ mod chip8_execute_tests {
         assert_eq!(0, cpu.registers.get(Register::VA));
         assert_eq!(1, cpu.registers.get(Register::VF));
     }
+
+    #[test]
+    fn execute_shl_vx_msb_zero() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 0b0101_0001);
+
+        cpu.execute(ShlVx {
+            vx: Register::VA,
+        })
+        .unwrap();
+
+        assert_eq!(
+            0b1010_0010,
+            cpu.registers.get(Register::VA)
+        );
+
+        assert_eq!(
+            0,
+            cpu.registers.get(Register::VF)
+        );
+    }
+
+    #[test]
+    fn execute_shl_vx_msb_one() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 0b1010_0001);
+
+        cpu.execute(ShlVx {
+            vx: Register::VA,
+        })
+        .unwrap();
+
+        assert_eq!(
+            0b0100_0010,
+            cpu.registers.get(Register::VA)
+        );
+
+        assert_eq!(
+            1,
+            cpu.registers.get(Register::VF)
+        );
+    }
 }
 
 #[cfg(test)]
@@ -755,6 +810,56 @@ mod chip8_tick_tests {
 
         assert_eq!(0b0101_0000,cpu.registers.get(Register::VA));
         assert_eq!(1,cpu.registers.get(Register::VF));
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_shl_vx_msb_zero() {
+        let mut cpu = Chip8::new();
+
+        // 8ABE = VA <<= 1, VF = most significant bit
+        cpu.memory[0x200] = 0x8A;
+        cpu.memory[0x201] = 0xBE;
+
+        cpu.registers.set(Register::VA, 0b0101_0001);
+
+        cpu.tick().unwrap();
+
+        assert_eq!(
+            0b1010_0010,
+            cpu.registers.get(Register::VA)
+        );
+
+        assert_eq!(
+            0,
+            cpu.registers.get(Register::VF)
+        );
+
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_shl_vx_msb_one() {
+        let mut cpu = Chip8::new();
+
+        // 8ABE = VA <<= 1, VF = most significant bit
+        cpu.memory[0x200] = 0x8A;
+        cpu.memory[0x201] = 0xBE;
+
+        cpu.registers.set(Register::VA, 0b1010_0001);
+
+        cpu.tick().unwrap();
+
+        assert_eq!(
+            0b0100_0010,
+            cpu.registers.get(Register::VA)
+        );
+
+        assert_eq!(
+            1,
+            cpu.registers.get(Register::VF)
+        );
+
         assert_eq!(0x202, cpu.pc);
     }
 }

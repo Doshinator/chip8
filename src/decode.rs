@@ -50,6 +50,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                 5 => Ok(Instruction::SubVxVy { vx, vy }),
                 6 => Ok(Instruction::ShrVx { vx }),
                 7 => Ok(Instruction::SubnVxVy { vx, vy }),
+                0xE => Ok(Instruction::ShlVx { vx }),
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }
         }
@@ -164,6 +165,18 @@ mod tests {
             Instruction::OrVxVy { 
                 vx: Register::VA,
                 vy: Register::VB,
+            },
+            instruction
+        );
+    }
+
+    #[test]
+    fn decode_shl_vx() {
+        let instruction = decode(0x8ABE).unwrap();
+
+        assert_eq!(
+            Instruction::ShlVx {
+                vx: Register::VA,
             },
             instruction
         );

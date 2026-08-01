@@ -80,5 +80,10 @@ pub enum Instruction {
     SubnVxVy {
         vx: Register,
         vy: Register,
-    }
+    },
+
+    // 8xyE - SHL Vx {, Vy}; Set Vx = Vx SHL 1.
+    ShlVx {
+        vx: Register,
+    },
 }
