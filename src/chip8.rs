@@ -1,7 +1,7 @@
 //!chip8.rs
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -103,7 +103,6 @@ impl Chip8 {
             OrVxVy { vx, vy } => {
                 let vx_val = self.registers.get(vx);
                 let vy_val = self.registers.get(vy);
-                
                 self.registers.set(vx, vx_val | vy_val);
 
                 Ok(())
@@ -112,6 +111,12 @@ impl Chip8 {
                 let vx_val = self.registers.get(vx);
                 let vy_val = self.registers.get(vy);
                 self.registers.set(vx, vx_val & vy_val);
+                Ok(())
+            },
+            XOrVxVy { vx, vy } => {
+                let vx_val = self.registers.get(vx);
+                let vy_val = self.registers.get(vy);
+                self.registers.set(vx, vx_val ^ vy_val);
                 Ok(())
             }
         }
@@ -363,6 +368,25 @@ mod chip8_execute_tests {
             cpu.registers.get(Register::VA)
         );
     }
+
+    #[test]
+    fn execute_xor_vxvy() {
+        let mut cpu = Chip8::new();
+        
+        cpu.registers.set(Register::VA, 0b1010_0001);
+        cpu.registers.set(Register::VB, 0b0000_1111);
+
+        cpu.execute(XOrVxVy { 
+            vx: Register::VA, 
+            vy: Register::VB 
+        })
+        .unwrap();
+
+        assert_eq!(
+            0b1010_1110,
+            cpu.registers.get(Register::VA)
+        );
+    }
 }
 
 #[cfg(test)]
@@ -516,6 +540,22 @@ mod chip8_tick_tests {
         cpu.tick().unwrap();
 
         assert_eq!(0b0000_0001, cpu.registers.get(Register::VA));
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_execute_xor_vxvy() {
+        let mut cpu = Chip8::new();
+        // 8AB1 = V[A] ^ V[B]
+        cpu.memory[0x200] = 0x8A;
+        cpu.memory[0x201] = 0xB3;
+
+        cpu.registers.set(Register::VA, 0b1010_0001);
+        cpu.registers.set(Register::VB, 0b0000_1111);
+
+        cpu.tick().unwrap();
+
+        assert_eq!(0b1010_1110, cpu.registers.get(Register::VA));
         assert_eq!(0x202, cpu.pc);
     }
 }
