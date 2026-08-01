@@ -69,5 +69,9 @@ pub enum Instruction {
     SubVxVy {
         vx: Register,
         vy: Register,
-    }    
+    },
+
+    ShrVx {
+        vx: Register,
+    }
 }
