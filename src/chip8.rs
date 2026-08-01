@@ -344,6 +344,25 @@ mod chip8_execute_tests {
             cpu.registers.get(Register::VA)
         )
     }
+
+    #[test]
+    fn execute_and_vxvy() {
+        let mut cpu = Chip8::new();
+        
+        cpu.registers.set(Register::VA, 0b1010_0001);
+        cpu.registers.set(Register::VB, 0b0000_1111);
+
+        cpu.execute(AndVxVy { 
+            vx: Register::VA, 
+            vy: Register::VB 
+        })
+        .unwrap();
+
+        assert_eq!(
+            0b0000_0001,
+            cpu.registers.get(Register::VA)
+        );
+    }
 }
 
 #[cfg(test)]
@@ -481,6 +500,22 @@ mod chip8_tick_tests {
         cpu.tick().unwrap();
 
         assert_eq!(0b1010_1111, cpu.registers.get(Register::VA));
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_execute_and_vxvy() {
+        let mut cpu = Chip8::new();
+        // 8AB1 = V[A] & V[B]
+        cpu.memory[0x200] = 0x8A;
+        cpu.memory[0x201] = 0xB2;
+
+        cpu.registers.set(Register::VA, 0b1010_0001);
+        cpu.registers.set(Register::VB, 0b0000_1111);
+
+        cpu.tick().unwrap();
+
+        assert_eq!(0b0000_0001, cpu.registers.get(Register::VA));
         assert_eq!(0x202, cpu.pc);
     }
 }
