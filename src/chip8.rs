@@ -1,7 +1,7 @@
 //!chip8.rs
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy, SubVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -118,7 +118,22 @@ impl Chip8 {
                 let vy_val = self.registers.get(vy);
                 self.registers.set(vx, vx_val ^ vy_val);
                 Ok(())
-            }
+            },
+            SubVxVy { vx, vy } => {
+                let vx_val = self.registers.get(vx);
+                let vy_val = self.registers.get(vy);
+                let (result, borrowed) = vx_val.overflowing_sub(vy_val);
+                self.registers.set(vx, result);
+
+                if !borrowed {
+                    self.registers.set(Register::VF, 1);
+                }
+                else {
+                    self.registers.set(Register::VF, 0);
+                }
+
+                Ok(())
+            },
         }
     }
 
@@ -386,6 +401,54 @@ mod chip8_execute_tests {
             0b1010_1110,
             cpu.registers.get(Register::VA)
         );
+    }
+
+    #[test]
+    fn execute_sub_vx_vy_without_borrow() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 20);
+        cpu.registers.set(Register::VB, 5);
+
+        cpu.execute(SubVxVy {
+            vx: Register::VA,
+            vy: Register::VB,
+        }).unwrap();
+
+        assert_eq!(15, cpu.registers.get(Register::VA));
+        assert_eq!(1, cpu.registers.get(Register::VF));
+    }
+
+    #[test]
+    fn execute_sub_vx_vy_with_borrow() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 5);
+        cpu.registers.set(Register::VB, 20);
+
+        cpu.execute(SubVxVy {
+            vx: Register::VA,
+            vy: Register::VB,
+        }).unwrap();
+
+        assert_eq!(241, cpu.registers.get(Register::VA));
+        assert_eq!(0, cpu.registers.get(Register::VF));
+    }
+
+    #[test]
+    fn execute_sub_vx_vy_equal_values() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 20);
+        cpu.registers.set(Register::VB, 20);
+
+        cpu.execute(SubVxVy {
+            vx: Register::VA,
+            vy: Register::VB,
+        }).unwrap();
+
+        assert_eq!(0, cpu.registers.get(Register::VA));
+        assert_eq!(1, cpu.registers.get(Register::VF));
     }
 }
 
