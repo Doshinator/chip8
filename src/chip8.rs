@@ -1,7 +1,7 @@
 //!chip8.rs
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy, ShlVx, ShrVx, SubVxVy, SubnVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy, ShlVx, ShrVx, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -125,13 +125,7 @@ impl Chip8 {
                 let (result, borrowed) = vx_val.overflowing_sub(vy_val);
                 self.registers.set(vx, result);
 
-                if !borrowed {
-                    self.registers.set(Register::VF, 1);
-                }
-                else {
-                    self.registers.set(Register::VF, 0);
-                }
-
+                self.registers.set(Register::VF, if !borrowed { 1 } else { 0 });
                 Ok(())
             },
             ShrVx { vx } => {
@@ -152,13 +146,7 @@ impl Chip8 {
 
                 self.registers.set(vx, result);
 
-                if !borrowed {
-                    self.registers.set(Register::VF, 1);
-                }
-                else {
-                    self.registers.set(Register::VF, 0);
-                }
-
+                self.registers.set(Register::VF, if !borrowed { 1 } else { 0 });
                 Ok(())
             },
             ShlVx { vx } => {
@@ -169,6 +157,16 @@ impl Chip8 {
 
                 self.registers.set(vx, result);
                 self.registers.set(Register::VF, most_significant_bit);
+
+                Ok(())
+            },
+            SneVxVy { vx, vy } => {
+                let vx_val = self.registers.get(vx);
+                let vy_val = self.registers.get(vy);
+
+                if vx_val != vy_val {
+                    self.pc += 2;
+                }
 
                 Ok(())
             },
@@ -624,6 +622,40 @@ mod chip8_execute_tests {
             cpu.registers.get(Register::VF)
         );
     }
+
+    #[test]
+    fn execute_sne_vx_vy_skips_when_not_equal() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 10);
+        cpu.registers.set(Register::VB, 20);
+        cpu.pc = 0x202;
+
+        cpu.execute(SneVxVy {
+            vx: Register::VA,
+            vy: Register::VB,
+        })
+        .unwrap();
+
+        assert_eq!(0x204, cpu.pc);
+    }
+
+    #[test]
+    fn execute_sne_vx_vy_does_not_skip_when_equal() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 10);
+        cpu.registers.set(Register::VB, 10);
+        cpu.pc = 0x202;
+
+        cpu.execute(SneVxVy {
+            vx: Register::VA,
+            vy: Register::VB,
+        })
+        .unwrap();
+
+        assert_eq!(0x202, cpu.pc);
+    }
 }
 
 #[cfg(test)]
@@ -861,5 +893,22 @@ mod chip8_tick_tests {
         );
 
         assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_sne_vx_vy() {
+        let mut cpu = Chip8::new();
+
+        // 9AB0 = skip next instruction if VA != VB
+        cpu.memory[0x200] = 0x9A;
+        cpu.memory[0x201] = 0xB0;
+
+        cpu.registers.set(Register::VA, 10);
+        cpu.registers.set(Register::VB, 20);
+
+        cpu.tick().unwrap();
+
+        // fetch advances to 0x202, then 9xy0 skips another instruction
+        assert_eq!(0x204, cpu.pc);
     }
 }

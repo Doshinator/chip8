@@ -53,6 +53,14 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                 0xE => Ok(Instruction::ShlVx { vx }),
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }
+        },
+        9 => {
+            let (vx, vy) = decode_xy_register(opcode)?;
+            match opcode & 0x000F {
+                0 => Ok(Instruction::SneVxVy { vx, vy }),
+                _ => Err(DecodeError::UnsupportedInstruction(opcode))
+            }
+            
         }
         _ => Err(DecodeError::UnsupportedInstruction(opcode)),
     }

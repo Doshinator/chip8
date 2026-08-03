@@ -86,4 +86,10 @@ pub enum Instruction {
     ShlVx {
         vx: Register,
     },
+
+    // 9xy0 - SNE Vx, Vy
+    SneVxVy {
+        vx: Register,
+        vy: Register,
+    },
 }
