@@ -92,4 +92,9 @@ pub enum Instruction {
         vx: Register,
         vy: Register,
     },
+
+    // Annn - LD I, addr; Set I = nnn.
+    LoadIndex {
+        address: u16
+    }
 }

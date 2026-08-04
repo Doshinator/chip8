@@ -61,7 +61,11 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }
             
-        }
+        },
+        0xA => {
+            let address = opcode & 0x0FFF;
+            Ok(Instruction::LoadIndex { address })
+        },
         _ => Err(DecodeError::UnsupportedInstruction(opcode)),
     }
 }

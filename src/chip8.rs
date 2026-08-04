@@ -1,7 +1,7 @@
 //!chip8.rs
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, OrVxVy, Return, SetVxVy, ShlVx, ShrVx, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, LoadIndex, OrVxVy, Return, SetVxVy, ShlVx, ShrVx, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -170,6 +170,10 @@ impl Chip8 {
 
                 Ok(())
             },
+            LoadIndex { address } => {
+                self.index = address;
+                Ok(())
+            }
         }
     }
 
@@ -656,6 +660,18 @@ mod chip8_execute_tests {
 
         assert_eq!(0x202, cpu.pc);
     }
+
+    #[test]
+    fn execute_loadindex() {
+        let mut cpu = Chip8::new();
+        
+        cpu.execute(LoadIndex { 
+            address: 0x123 
+        })
+        .unwrap();
+
+        assert_eq!(0x123, cpu.index);
+    }
 }
 
 #[cfg(test)]
@@ -910,5 +926,18 @@ mod chip8_tick_tests {
 
         // fetch advances to 0x202, then 9xy0 skips another instruction
         assert_eq!(0x204, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_loadindex() {
+        let mut cpu = Chip8::new();
+
+        cpu.memory[0x200] = 0xA1;
+        cpu.memory[0x201] = 0x23;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(0x123, cpu.index);
+        assert_eq!(0x202, cpu.pc);
     }
 }
