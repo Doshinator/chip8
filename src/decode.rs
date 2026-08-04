@@ -16,7 +16,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
         },
         1 => {
             let address = opcode & 0x0FFF;
-            Ok(Instruction::Jump { address })
+            Ok(Instruction::JumpAddr { address })
         },
         2 => {
             let address = opcode & 0x0FFF;
@@ -128,7 +128,7 @@ mod tests {
         let instruction = decode(0x1234).unwrap();
         assert_eq!(
             instruction,
-            Instruction::Jump { 
+            Instruction::JumpAddr { 
                 address: 0x234 
             }
         );

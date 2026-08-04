@@ -12,7 +12,7 @@ pub enum Instruction {
     Return,
 
     // 1nnn - JP addr - Jump to a machine code routine at nnn
-    Jump {
+    JumpAddr {
         address: u16,
     },
 
@@ -96,5 +96,10 @@ pub enum Instruction {
     // Annn - LD I, addr; Set I = nnn.
     LoadIndex {
         address: u16
+    },
+
+    // Bnnn - JP V0, addr; Jump to location nnn + V0.
+    JumpV0 {
+        address: u16,
     }
 }

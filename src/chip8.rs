@@ -1,7 +1,7 @@
 //!chip8.rs
 use core::fmt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Jump, LoadImmediate, LoadIndex, OrVxVy, Return, SetVxVy, ShlVx, ShrVx, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, JumpAddr, LoadImmediate, LoadIndex, OrVxVy, Return, SetVxVy, ShlVx, ShrVx, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -61,7 +61,7 @@ impl Chip8 {
                 self.display.clear();
                 Ok(())
             },
-            Jump { address } => {
+            JumpAddr { address } => {
                 self.pc = address;
                 Ok(())
             },
@@ -173,7 +173,8 @@ impl Chip8 {
             LoadIndex { address } => {
                 self.index = address;
                 Ok(())
-            }
+            },
+            
         }
     }
 
@@ -286,7 +287,7 @@ mod chip8_execute_tests {
     fn execute_jump() {
         let mut cpu = Chip8::new();
     
-        cpu.execute(Instruction::Jump { address: 0x234}).unwrap();
+        cpu.execute(Instruction::JumpAddr { address: 0x234}).unwrap();
 
         assert_eq!(0x234, cpu.pc)
     }
