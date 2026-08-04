@@ -175,7 +175,7 @@ impl Chip8 {
                 Ok(())
             },
             JumpV0 { address } => {
-                self.index = address + (self.registers.get(Register::V0) as u16);
+                self.pc = address + (self.registers.get(Register::V0) as u16);
                 Ok(())
             }
         }
@@ -675,6 +675,17 @@ mod chip8_execute_tests {
         .unwrap();
 
         assert_eq!(0x123, cpu.index);
+    }
+
+    #[test]
+    fn execute_jump_v0() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::V0, 0x10);
+
+        cpu.execute(Instruction::JumpV0 { address: 0x300 }).unwrap();
+
+        assert_eq!(0x310, cpu.pc);
     }
 }
 
