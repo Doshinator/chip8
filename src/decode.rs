@@ -70,6 +70,15 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             let address = opcode & 0x0FFF;
             Ok(Instruction::JumpV0 { address })
         },
+        0xC => {
+            let x = ((opcode >> 8) & 0x0F ) as u8;
+            let vx = Register::from_index(x)
+                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
+            let kk = (opcode & 0x00FF) as u8;
+            
+            Ok(Instruction::RandomAndImmediate { vx, value: kk })
+        },
+
         _ => Err(DecodeError::UnsupportedInstruction(opcode)),
     }
 }

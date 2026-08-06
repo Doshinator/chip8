@@ -101,5 +101,11 @@ pub enum Instruction {
     // Bnnn - JP V0, addr; Jump to location nnn + V0.
     JumpV0 {
         address: u16,
+    },
+
+    // Cxkk - RND Vx, byte; Set Vx = random byte AND kk.
+    RandomAndImmediate {
+        vx: Register,
+        value: u8,
     }
 }
