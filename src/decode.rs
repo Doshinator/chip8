@@ -80,8 +80,8 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
         },
         0xD => {
             let (vx, vy) = decode_xy_register(opcode)?;
-            let bytes = (opcode & 0x000F) as u8;
-            Ok(Instruction::Draw { vx, vy, bytes})
+            let n = (opcode & 0x000F) as u8;
+            Ok(Instruction::Draw { vx, vy, n})
         },
         _ => Err(DecodeError::UnsupportedInstruction(opcode)),
     }

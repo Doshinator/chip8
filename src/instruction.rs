@@ -113,6 +113,6 @@ pub enum Instruction {
     Draw {
         vx: Register,
         vy: Register,
-        bytes: u8,
+        n: u8,
     },
 }

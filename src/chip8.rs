@@ -186,8 +186,7 @@ impl Chip8 {
                 self.registers.set(vx, random_byte & value);
                 Ok(())
             },
-            Draw { vx, vy, bytes } => {
-                
+            Draw { vx, vy, n } => {
                 todo!()
             },
         }
