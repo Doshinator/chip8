@@ -107,5 +107,12 @@ pub enum Instruction {
     RandomAndImmediate {
         vx: Register,
         value: u8,
-    }
+    },
+
+    // Dxyn - DRW Vx, Vy, nibble; Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+    Draw {
+        vx: Register,
+        vy: Register,
+        bytes: u8,
+    },
 }
