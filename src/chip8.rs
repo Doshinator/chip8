@@ -201,7 +201,7 @@ impl Chip8 {
                     Register::VF,
                     if collision { 1 } else { 0 }
                 );
-                
+
                 Ok(())
             },
         }
@@ -743,6 +743,68 @@ mod chip8_execute_tests {
 
         assert_eq!(0, cpu.registers.get(Register::VA));
     }
+
+    #[test]
+    fn execute_draw_sprite() {
+        let mut cpu = Chip8::new();
+
+        cpu.index = 0x300;
+        cpu.memory[0x300] = 0b1111_0000;
+        cpu.memory[0x301] = 0b1001_0000;
+
+        cpu.registers.set(Register::VA, 10);
+        cpu.registers.set(Register::VB, 5);
+
+        cpu.execute(Draw {
+            vx: Register::VA,
+            vy: Register::VB,
+            n: 2,
+        }).unwrap();
+
+        // First sprite row: ****
+        assert!(cpu.display.is_on(10, 5));
+        assert!(cpu.display.is_on(11, 5));
+        assert!(cpu.display.is_on(12, 5));
+        assert!(cpu.display.is_on(13, 5));
+
+        // Second sprite row: *  *
+        assert!(cpu.display.is_on(10, 6));
+        assert!(cpu.display.is_on(13, 6));
+
+        assert_eq!(0, cpu.registers.get(Register::VF));
+    }
+
+    #[test]
+    fn execute_draw_sprite_sets_vf_on_collision() {
+        let mut cpu = Chip8::new();
+
+        cpu.index = 0x300;
+        cpu.memory[0x300] = 0b1000_0000;
+
+        cpu.registers.set(Register::VA, 10);
+        cpu.registers.set(Register::VB, 5);
+
+        // First draw: pixel is off, so no collision.
+        cpu.execute(Draw {
+            vx: Register::VA,
+            vy: Register::VB,
+            n: 1,
+        }).unwrap();
+
+        assert_eq!(0, cpu.registers.get(Register::VF));
+
+        // Second draw: same pixel is already on.
+        cpu.execute(Draw {
+            vx: Register::VA,
+            vy: Register::VB,
+            n: 1,
+        }).unwrap();
+
+        assert_eq!(1, cpu.registers.get(Register::VF));
+
+        // XOR means drawing it again erased it.
+        assert!(!cpu.display.is_on(5, 10));
+    }
 }
 
 #[cfg(test)]
@@ -1025,5 +1087,34 @@ mod chip8_tick_tests {
         cpu.tick().unwrap();
 
         assert_eq!(0x310, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_draw_sprite() {
+        let mut cpu = Chip8::new();
+
+        // DAB2 = draw 2-byte sprite at (VA, VB)
+        cpu.memory[0x200] = 0xDA;
+        cpu.memory[0x201] = 0xB2;
+
+        cpu.index = 0x300;
+        cpu.memory[0x300] = 0b1111_0000;
+        cpu.memory[0x301] = 0b1001_0000;
+
+        cpu.registers.set(Register::VA, 10);
+        cpu.registers.set(Register::VB, 5);
+
+        cpu.tick().unwrap();
+
+        assert!(cpu.display.is_on(10, 5));
+        assert!(cpu.display.is_on(11, 5));
+        assert!(cpu.display.is_on(12, 5));
+        assert!(cpu.display.is_on(13, 5));
+
+        assert!(cpu.display.is_on(10, 6));
+        assert!(cpu.display.is_on(13, 6));
+
+        assert_eq!(0x202, cpu.pc);
+        assert_eq!(0, cpu.registers.get(Register::VF));
     }
 }
