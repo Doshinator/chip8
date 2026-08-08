@@ -187,7 +187,22 @@ impl Chip8 {
                 Ok(())
             },
             Draw { vx, vy, n } => {
-                todo!()
+                let x = self.registers.get(vx);
+                let y = self.registers.get(vy);
+
+                let start = self.index as usize;
+                let end = start + n as usize;
+
+                let sprite = &self.memory[start..end];
+
+                let collision = self.display.draw_sprite(x, y, sprite);
+
+                self.registers.set(
+                    Register::VF,
+                    if collision { 1 } else { 0 }
+                );
+                
+                Ok(())
             },
         }
     }

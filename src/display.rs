@@ -19,7 +19,7 @@ impl Display {
     }
 
     pub fn is_on(&self, width: usize, height: usize) -> bool {
-        self.pixels[width][height]
+        self.pixels[height][width]
     }
 
     pub fn draw_sprite(
@@ -28,24 +28,28 @@ impl Display {
         y: u8,
         sprite: &[u8],
     ) -> bool {
-        // collision = false
-        // get starting pos
-
-        // for row, value in each sprite array
+        let mut collision = false;
+        let start_x = x as usize;
+        let start_y = y as usize;
         
-            // for bit position (col) 0..8
-                // if bit is 0
-                    // continue
+        for (sprite_row, sprite_byte) in sprite.iter().enumerate() {
+            for sprite_col in 0..8 {
+                let bit = (sprite_byte >> (7 - sprite_col)) & 1;
 
-                // get new_x and y pos + wrap
+                if bit == 0 { continue }
+                
+                let pos_x = (start_x + sprite_col) % WIDTH;
+                let pos_y = (start_y + sprite_row) % HEIGHT;
 
-                // if display is already ON
-                    // collision = true (1 ^ 1 -> 0 = collision, therefore it's a collision)
+                if self.pixels[pos_y][pos_x] {
+                    collision = true;
+                }
+                
+                self.pixels[pos_y][pos_x] ^= true;
+            }
+        }
 
-                // xor the pixel at new_x_pos, new_y_pos
-
-        // return -> collision
-        todo!()
+        collision
     }
 }
 
