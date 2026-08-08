@@ -1,9 +1,9 @@
 //!chip8.rs
-use core::fmt;
+use core::{error, fmt};
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, OrVxVy, RandomAndImmediate, Return, SetVxVy, ShlVx, ShrVx, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, OrVxVy, RandomAndImmediate, Return, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, keypad::KeypadError, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -204,6 +204,12 @@ impl Chip8 {
 
                 Ok(())
             },
+            SkipIfPressed { vx, key } => {
+                todo!()
+            },
+            SkipIfNotPressed { vx, key } => {
+                todo!()
+            },
         }
     }
 
@@ -226,6 +232,7 @@ pub enum Chip8Error {
     Register(RegisterError),
     Stack(StackError),
     Decode(DecodeError),
+    Keypad(KeypadError),
 }
 
 impl From<RegisterError> for Chip8Error {
@@ -246,12 +253,19 @@ impl From<DecodeError> for Chip8Error {
     }
 }
 
+impl From<KeypadError> for Chip8Error {
+    fn from(error: KeypadError) -> Self {
+        Chip8Error::Keypad(error)
+    }
+}
+
 impl fmt::Display for Chip8Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Chip8Error::Register(e) => write!(f, "register error: {e}"),
             Chip8Error::Stack(e)    => write!(f, "stack error: {e}"),
             Chip8Error::Decode(e)   => write!(f, "decode error: {e}"),
+            Chip8Error::Keypad(e) => write!(f, "keypad error: {e}"),
         }
     }
 }
@@ -260,8 +274,9 @@ impl std::error::Error for Chip8Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             Chip8Error::Register(e) => Some(e),
-            Chip8Error::Stack(e)    => Some(e),
-            Chip8Error::Decode(e)   => Some(e),
+            Chip8Error::Stack(e) => Some(e),
+            Chip8Error::Decode(e) => Some(e),
+            Chip8Error::Keypad(e) => Some(e),
         }
     }
 }

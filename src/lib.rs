@@ -4,3 +4,4 @@ pub mod registers;
 pub mod decode;
 pub mod stack;
 pub mod display;
+pub mod keypad;
