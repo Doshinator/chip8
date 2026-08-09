@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, OrVxVy, RandomAndImmediate, Return, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, keypad::{Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, OrVxVy, RandomAndImmediate, Return, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -205,10 +205,24 @@ impl Chip8 {
                 Ok(())
             },
             SkipIfPressed { vx } => {
-                todo!()
+                let x = self.registers.get(vx);
+                let key = Key::try_from(x)?;
+                
+                if self.keypad.is_pressed(key) {
+                    self.pc += 2;
+                }
+
+                Ok(())
             },
             SkipIfNotPressed { vx } => {
-                todo!()
+                let x = self.registers.get(vx);
+                let key = Key::try_from(x)?;
+
+                if !self.keypad.is_pressed(key) {
+                    self.pc += 2;
+                }
+
+                Ok(())
             },
         }
     }
@@ -324,7 +338,7 @@ mod tests {
 
 #[cfg(test)]
 mod chip8_execute_tests {
-    use crate::registers::Register;
+    use crate::{keypad::Key::KA, registers::Register};
     use super::*;
 
      #[test]
@@ -820,6 +834,70 @@ mod chip8_execute_tests {
         // XOR means drawing it again erased it.
         assert!(!cpu.display.is_on(5, 10));
     }
+
+    #[test]
+    fn execute_skip_key_pressed_true() {
+        let mut cpu = Chip8::new();
+
+        cpu.pc = 0x200;
+        cpu.registers.set(Register::VA, 10);
+        cpu.keypad.press(KA);
+
+        cpu.execute(Instruction::SkipIfPressed {
+            vx: Register::VA
+        })
+        .unwrap();
+
+        assert_eq!(true, cpu.keypad.is_pressed(KA));
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn execute_skip_key_pressed_false() {
+        let mut cpu = Chip8::new();
+
+        cpu.pc = 0x200;
+
+        cpu.execute(Instruction::SkipIfPressed {
+            vx: Register::VA
+        })
+        .unwrap();
+
+        assert_eq!(false, cpu.keypad.is_pressed(KA));
+        assert_eq!(0x200, cpu.pc);
+    }
+
+    #[test]
+    fn execute_skip_key_not_pressed_true() {
+        let mut cpu = Chip8::new();
+
+        cpu.pc = 0x200;
+
+        cpu.execute(Instruction::SkipIfNotPressed {
+            vx: Register::VA
+        })
+        .unwrap();
+
+        assert_eq!(true, !cpu.keypad.is_pressed(KA));
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn execute_skip_key_not_pressed_false() {
+        let mut cpu = Chip8::new();
+
+        cpu.pc = 0x200;
+        cpu.registers.set(Register::VA, 10);
+        cpu.keypad.press(KA);
+
+        cpu.execute(Instruction::SkipIfNotPressed {
+            vx: Register::VA
+        })
+        .unwrap();
+
+        assert_eq!(true, cpu.keypad.is_pressed(KA));
+        assert_eq!(0x200, cpu.pc);
+    }
 }
 
 #[cfg(test)]
@@ -1131,5 +1209,36 @@ mod chip8_tick_tests {
 
         assert_eq!(0x202, cpu.pc);
         assert_eq!(0, cpu.registers.get(Register::VF));
+    }
+
+    #[test]
+    fn tick_executes_skip_if_pressed() {
+        let mut cpu = Chip8::new();
+
+        // EX9E = skip next instruction if V0 key is pressed
+        cpu.memory[0x200] = 0xE0;
+        cpu.memory[0x201] = 0x9E;
+
+        cpu.registers.set(Register::V0, 0x5);
+        cpu.keypad.press(Key::K5);
+
+        cpu.tick().unwrap();
+
+        assert_eq!(0x204, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_skip_if_pressed_when_not_pressed() {
+        let mut cpu = Chip8::new();
+
+        // EX9E
+        cpu.memory[0x200] = 0xE0;
+        cpu.memory[0x201] = 0x9E;
+
+        cpu.registers.set(Register::V0, 0x5);
+
+        cpu.tick().unwrap();
+
+        assert_eq!(0x202, cpu.pc);
     }
 }
