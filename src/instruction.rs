@@ -119,12 +119,10 @@ pub enum Instruction {
     // Ex9E - SKP Vx; Skip next instruction if key with the value of Vx is pressed.
     SkipIfPressed {
         vx: Register,
-        key: Keypad,
     },
 
     // ExA1 - SKNP Vx; Skip next instruction if key with the value of Vx is not pressed.
     SkipIfNotPressed {
         vx: Register,
-        key: Keypad,
     }
 }

@@ -1,4 +1,6 @@
 //!keypad.rs
+
+use core::{error, fmt};
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Keypad {
     keys: [bool; 16],
@@ -103,6 +105,16 @@ impl TryFrom<u8> for Key {
 pub enum KeypadError {
     InvalidKey(u8),
 }
+
+impl fmt::Display for KeypadError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            KeypadError::InvalidKey(key) => write!(f, "invalid key {key}")
+        }
+    }
+}
+
+impl std::error::Error for KeypadError {}
 
 #[cfg(test)]
 mod keypad_tests {

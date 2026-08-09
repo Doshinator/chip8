@@ -83,6 +83,21 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             let n = (opcode & 0x000F) as u8;
             Ok(Instruction::Draw { vx, vy, n})
         },
+        0xE => {
+            let idx = ((opcode >> 8) & 0x0F) as u8;
+            let vx = Register::from_index(idx)
+                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
+
+            match opcode & 0x00FF {
+                0x9E => {
+                    Ok(Instruction::SkipIfPressed { vx })
+                },
+                0xA1 => {
+                    Ok(Instruction::SkipIfNotPressed { vx })
+                },
+                _ => Err(DecodeError::UnsupportedInstruction(opcode))
+            }
+        }
         _ => Err(DecodeError::UnsupportedInstruction(opcode)),
     }
 }
