@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -14,7 +14,7 @@ pub struct Chip8 {
     display: Display,
     keypad: Keypad,
 
-    // display_timer: Timer,
+    delay_timer: Timer,
     // sound_timer: Timer,
 
     pc: u16,
@@ -31,7 +31,7 @@ impl Chip8 {
             display: Display::new(),
             keypad: Keypad::new(),
 
-            // display_timer: Time::new(),
+            delay_timer: Timer::new(),
             // sound_timer: Time::new(),
             
             pc: 0x200,
@@ -225,7 +225,10 @@ impl Chip8 {
                 Ok(())
             },
             LoadVxDelayTimer { vx } => {
-                todo!()
+                let value = self.delay_timer.get();
+                self.registers.set(vx, value);
+                
+                Ok(())
             },
         }
     }
@@ -901,6 +904,19 @@ mod chip8_execute_tests {
         assert_eq!(true, cpu.keypad.is_pressed(KA));
         assert_eq!(0x200, cpu.pc);
     }
+
+    #[test]
+    fn execute_load_vx_delay_timer() {
+        let mut cpu = Chip8::new();
+
+        cpu.delay_timer.set(42);
+
+        cpu.execute(Instruction::LoadVxDelayTimer {
+            vx: Register::VA,
+        }).unwrap();
+
+        assert_eq!(42, cpu.registers.get(Register::VA));
+    }
 }
 
 #[cfg(test)]
@@ -1273,6 +1289,21 @@ mod chip8_tick_tests {
 
         cpu.tick().unwrap();
 
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_load_vx_delay_timer() {
+        let mut cpu = Chip8::new();
+        
+        cpu.delay_timer.set(42);
+        cpu.memory[0x200] = 0xFA;
+        cpu.memory[0x201] = 0x07;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(42, cpu.registers.get(Register::VA));
+        assert_eq!(42, cpu.delay_timer.get());
         assert_eq!(0x202, cpu.pc);
     }
 }

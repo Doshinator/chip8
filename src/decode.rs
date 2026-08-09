@@ -1,6 +1,5 @@
 //!decode.rs
 use core::fmt;
-use std::fs::TryLockError::Error;
 
 use crate::{decode::DecodeError::UnsupportedInstruction, instruction::Instruction, registers::Register::{self}};
 
@@ -100,9 +99,12 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             }
         },
         0xF => {
-            let vx = ((opcode >> 8) & 0x0F) as u8;
+            let idx = ((opcode >> 8) & 0x0F) as u8;
+            let vx = Register::from_index(idx)
+                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
+
             match opcode & 0x00FF {
-                0x07 => todo!(),
+                0x07 => Ok(Instruction::LoadVxDelayTimer { vx }),
                 0x0A => todo!(),
                 0x15 => todo!(),
                 0x18 => todo!(),
