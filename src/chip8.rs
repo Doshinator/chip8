@@ -1241,4 +1241,35 @@ mod chip8_tick_tests {
 
         assert_eq!(0x202, cpu.pc);
     }
+
+    #[test]
+    fn tick_executes_skip_if_not_pressed() {
+        let mut cpu = Chip8::new();
+
+        // EXA1 = skip next instruction if V0 key is NOT pressed
+        cpu.memory[0x200] = 0xE0;
+        cpu.memory[0x201] = 0xA1;
+
+        cpu.registers.set(Register::V0, 0x5);
+
+        cpu.tick().unwrap();
+
+        assert_eq!(0x204, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_skip_if_not_pressed_when_pressed() {
+        let mut cpu = Chip8::new();
+
+        // EXA1
+        cpu.memory[0x200] = 0xE0;
+        cpu.memory[0x201] = 0xA1;
+
+        cpu.registers.set(Register::V0, 0x5);
+        cpu.keypad.press(Key::K5);
+
+        cpu.tick().unwrap();
+
+        assert_eq!(0x202, cpu.pc);
+    }
 }
