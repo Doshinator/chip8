@@ -1,6 +1,4 @@
 //!keypad.rs
-use core::fmt;
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Keypad {
     keys: [bool; 16],
@@ -8,16 +6,22 @@ pub struct Keypad {
 }
 
 impl Keypad {
+    pub fn new() -> Self {
+        Keypad {
+            keys: [false; 16],
+        }
+    }
+
     pub fn is_pressed(&self, key: Key) -> bool {
         self.keys[key.index()]
     }
 
-    pub fn press(key: Key) {
-        todo!()
+    pub fn press(&mut self, key: Key) {
+        self.keys[key.index()] = true;
     }
 
-    pub fn release(key: Key) {
-        todo!()
+    pub fn release(&mut self, key: Key) {
+        self.keys[key.index()] = false;
     }
 
 }
@@ -65,23 +69,76 @@ impl Key {
     }
 }
 
-/**
- * 
- * Custom Error for keypad
- */
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum KeypadError {
-    UnsupportedKey(usize)
-}
-
-impl fmt::Display for KeypadError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            KeypadError::UnsupportedKey(key) => {
-                write!(f, "unsupported key: {key}")
-            }
+impl TryFrom<u8> for Key {
+    type Error = KeypadError;
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Key::K0),
+            1 => Ok(Key::K1),
+            2 => Ok(Key::K2),
+            3 => Ok(Key::K3),
+            4 => Ok(Key::K4),
+            5 => Ok(Key::K5),
+            6 => Ok(Key::K6),
+            7 => Ok(Key::K7),
+            8 => Ok(Key::K8),
+            9 => Ok(Key::K9),
+            10 => Ok(Key::KA),
+            11 => Ok(Key::KB),
+            12 => Ok(Key::KC),
+            13 => Ok(Key::KD),
+            14 => Ok(Key::KE),
+            15 => Ok(Key::KF),
+            _ => Err(KeypadError::InvalidKey(value)),
         }
     }
 }
-impl std::error::Error for KeypadError {}
+
+/**
+ * 
+ * Custom Error
+ */
+
+#[derive(Debug, PartialEq)]
+pub enum KeypadError {
+    InvalidKey(u8),
+}
+
+#[cfg(test)]
+mod keypad_tests {
+    use crate::keypad::{Key, Keypad, KeypadError};
+
+    #[test]
+    fn is_key_pressed_test() {
+        let mut keypad = Keypad::new();
+        
+        keypad.press(Key::K0);
+
+        assert_eq!(true, keypad.is_pressed(Key::K0));
+    }
+
+    #[test]
+    fn is_key_release_test() {
+        let mut keypad = Keypad::new();
+        
+        keypad.press(Key::K0);
+        assert_eq!(true, keypad.is_pressed(Key::K0));
+        keypad.release(Key::K0);
+        assert_eq!(false, keypad.is_pressed(Key::K0));
+    }
+
+    #[test]
+    fn try_from_u8_returns_correct_key() {
+        assert_eq!(Key::try_from(0).unwrap(), Key::K0);
+        assert_eq!(Key::try_from(10).unwrap(), Key::KA);
+        assert_eq!(Key::try_from(15).unwrap(), Key::KF);
+    }
+
+    #[test]
+    fn try_from_u8_rejects_invalid_key() {
+        assert_eq!(
+            Key::try_from(16),
+            Err(KeypadError::InvalidKey(16))
+        );
+    }
+}
