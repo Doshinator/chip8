@@ -125,4 +125,7 @@ pub enum Instruction {
     SkipIfNotPressed {
         vx: Register,
     }
+
+    // Fx07 - LD Vx, DT;Set Vx = delay timer value.
+    
 }
