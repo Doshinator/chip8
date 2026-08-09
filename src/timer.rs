@@ -51,4 +51,13 @@ mod time_tests {
 
         assert_eq!(59, timer.get());
     }
+
+    #[test]
+    fn set_updates_timer() {
+        let mut timer = Timer::new();
+
+        timer.set(42);
+
+        assert_eq!(42, timer.get());
+    }
 }
