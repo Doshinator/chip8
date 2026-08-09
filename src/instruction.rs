@@ -1,4 +1,4 @@
-use crate::{keypad::Keypad, registers::Register};
+use crate::registers::Register;
 
 /**
  * Standard Chip-8 Instructions

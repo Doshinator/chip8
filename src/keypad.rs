@@ -1,6 +1,6 @@
 //!keypad.rs
 
-use core::{error, fmt};
+use core::fmt;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Keypad {
     keys: [bool; 16],
