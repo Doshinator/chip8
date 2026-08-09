@@ -1,5 +1,6 @@
 //!decode.rs
 use core::fmt;
+use std::fs::TryLockError::Error;
 
 use crate::{decode::DecodeError::UnsupportedInstruction, instruction::Instruction, registers::Register::{self}};
 
@@ -95,6 +96,21 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                 0xA1 => {
                     Ok(Instruction::SkipIfNotPressed { vx })
                 },
+                _ => Err(DecodeError::UnsupportedInstruction(opcode))
+            }
+        },
+        0xF => {
+            let vx = ((opcode >> 8) & 0x0F) as u8;
+            match opcode & 0x00FF {
+                0x07 => todo!(),
+                0x0A => todo!(),
+                0x15 => todo!(),
+                0x18 => todo!(),
+                0x1E => todo!(),
+                0x29 => todo!(),
+                0x33 => todo!(),
+                0x55 => todo!(),
+                0x65 => todo!(),
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }
         }

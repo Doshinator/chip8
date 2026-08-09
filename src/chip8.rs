@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, OrVxVy, RandomAndImmediate, Return, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -223,6 +223,9 @@ impl Chip8 {
                 }
 
                 Ok(())
+            },
+            LoadVxDelayTimer { vx } => {
+                todo!()
             },
         }
     }

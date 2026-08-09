@@ -124,8 +124,10 @@ pub enum Instruction {
     // ExA1 - SKNP Vx; Skip next instruction if key with the value of Vx is not pressed.
     SkipIfNotPressed {
         vx: Register,
-    }
+    },
 
     // Fx07 - LD Vx, DT;Set Vx = delay timer value.
-    
+    LoadVxDelayTimer {
+        vx: Register
+    }
 }
