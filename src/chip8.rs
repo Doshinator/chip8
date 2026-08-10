@@ -359,7 +359,7 @@ mod tests {
 
 #[cfg(test)]
 mod chip8_execute_tests {
-    use crate::{keypad::Key::KA, registers::Register};
+    use crate::{keypad::Key::*, registers::Register::*};
     use super::*;
 
      #[test]
@@ -928,15 +928,35 @@ mod chip8_execute_tests {
 
         cpu.execute(Instruction::LoadVxDelayTimer {
             vx: Register::VA,
-        }).unwrap();
+        })
+        .unwrap();
 
         assert_eq!(42, cpu.registers.get(Register::VA));
+    }
+    
+    #[test]
+    fn execute_wait_for_key_true() {
+        let mut cpu = Chip8::new();
+        
+        cpu.execute(WaitForKeyPress { 
+            vx: VA 
+        })
+        .unwrap();
+
+        assert_eq!(Some(VA), cpu.waiting_for_key);
+    }
+
+    #[test]
+    fn execute_wait_for_key_none() {
+        let cpu = Chip8::new();
+
+        assert_eq!(None, cpu.waiting_for_key);
     }
 }
 
 #[cfg(test)]
 mod chip8_tick_tests {
-    use crate::{display::{HEIGHT, WIDTH}, registers::Register};
+use crate::{display::{HEIGHT, WIDTH}, registers::Register::{self, VA}};
     use super::*;
     
     #[test]
@@ -1320,5 +1340,27 @@ mod chip8_tick_tests {
         assert_eq!(42, cpu.registers.get(Register::VA));
         assert_eq!(42, cpu.delay_timer.get());
         assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_wait_for_key_press() {
+        let mut cpu = Chip8::new();
+
+        cpu.memory[0x200] = 0xFA;
+        cpu.memory[0x201] = 0x0A;
+
+        // First tick executes FX0A and enters waiting state.
+        cpu.tick().unwrap();
+
+        // No key has been pressed yet.
+        assert_eq!(cpu.registers.get(VA), 0);
+
+        // Now press K5.
+        cpu.keypad.press(Key::K5);
+
+        // Second tick handles the waiting state.
+        cpu.tick().unwrap();
+
+        assert_eq!(Key::K5.index(), cpu.registers.get(VA) as usize);
     }
 }
