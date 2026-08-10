@@ -134,5 +134,10 @@ pub enum Instruction {
     // Fx0A - LD Vx, K; Wait for a key press, store the value of the key in Vx.
     WaitForKeyPress {
         vx: Register,
+    },
+
+    // Fx15 - LD DT, Vx; Set delay timer = Vx.
+    SetDelayTimer {
+        vx: Register,
     }
 }
