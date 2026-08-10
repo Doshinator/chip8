@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -15,8 +15,9 @@ pub struct Chip8 {
     keypad: Keypad,
 
     delay_timer: Timer,
+    waiting_for_key: Option<Register>,
     // sound_timer: Timer,
-
+    
     pc: u16,
     index: u16,
 }
@@ -32,6 +33,7 @@ impl Chip8 {
             keypad: Keypad::new(),
 
             delay_timer: Timer::new(),
+            waiting_for_key: None,
             // sound_timer: Time::new(),
             
             pc: 0x200,
@@ -230,6 +232,10 @@ impl Chip8 {
                 
                 Ok(())
             },
+            WaitForKeyPress { vx } => {
+                
+                Ok(())
+            }
         }
     }
 
