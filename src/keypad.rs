@@ -26,6 +26,19 @@ impl Keypad {
         self.keys[key.index()] = false;
     }
 
+    pub fn pressed_key(&self) -> Option<Key> {
+        for key in [
+            Key::K0, Key::K1, Key::K2, Key::K3,
+            Key::K4, Key::K5, Key::K6, Key::K7,
+            Key::K8, Key::K9, Key::KA, Key::KB,
+            Key::KC, Key::KD, Key::KE, Key::KF,
+        ] {
+            if self.is_pressed(key) {
+                return Some(key);
+            }
+        }
+        None
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -118,7 +131,7 @@ impl std::error::Error for KeypadError {}
 
 #[cfg(test)]
 mod keypad_tests {
-    use crate::keypad::{Key, Keypad, KeypadError};
+    use crate::keypad::{Key::{self, K0}, Keypad, KeypadError};
 
     #[test]
     fn is_key_pressed_test() {
@@ -152,5 +165,21 @@ mod keypad_tests {
             Key::try_from(16),
             Err(KeypadError::InvalidKey(16))
         );
+    }
+
+    #[test]
+    fn pressed_some_key() {
+        let mut keypad = Keypad::new();
+        let key = K0;
+        keypad.keys[key.index()] = true;
+        
+        assert_eq!(Some(key), keypad.pressed_key());
+    }
+
+    #[test]
+    fn pressed_key_none() {
+        let keypad = Keypad::new();
+        
+        assert_eq!(None, keypad.pressed_key());
     }
 }

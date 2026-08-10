@@ -233,13 +233,22 @@ impl Chip8 {
                 Ok(())
             },
             WaitForKeyPress { vx } => {
-                
+                self.waiting_for_key = Some(vx);
                 Ok(())
             }
         }
     }
 
     pub fn tick(&mut self) -> Result<(), Chip8Error> {
+        if let Some(vx) = self.waiting_for_key {
+            if let Some(key) = self.keypad.pressed_key() {
+                self.registers.set(vx, key.index() as u8);
+                self.waiting_for_key = None;
+            }
+
+            return Ok(())
+        }
+
         let opcode = self.fetch();
         let instruction = decode(opcode)?;
         self.execute(instruction)?;
