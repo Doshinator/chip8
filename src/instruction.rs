@@ -139,5 +139,10 @@ pub enum Instruction {
     // Fx15 - LD DT, Vx; Set delay timer = Vx.
     SetDelayTimer {
         vx: Register,
+    },
+
+    // Fx18 - LD ST, Vx; Set sound timer = Vx.
+    SetSoundTimer {
+        vx: Register,
     }
 }

@@ -107,7 +107,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                 0x07 => Ok(Instruction::LoadVxDelayTimer { vx }),
                 0x0A => Ok(Instruction::WaitForKeyPress { vx }),
                 0x15 => Ok(Instruction::SetDelayTimer { vx }),
-                0x18 => todo!(),
+                0x18 => Ok(Instruction::SetSoundTimer { vx }),
                 0x1E => todo!(),
                 0x29 => todo!(),
                 0x33 => todo!(),
