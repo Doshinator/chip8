@@ -6,3 +6,4 @@ pub mod stack;
 pub mod display;
 pub mod keypad;
 pub mod timer;
+pub mod font;

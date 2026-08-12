@@ -152,5 +152,7 @@ pub enum Instruction {
     },
 
     // Fx29 - LD F, Vx; Set I = location of sprite for digit Vx.
-    
+    LoadFontSprite {
+        vx: Register,
+    }
 }
