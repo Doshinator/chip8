@@ -146,7 +146,11 @@ pub enum Instruction {
         vx: Register,
     },
     
+    // Fx1E - ADD I, Vx; Set I = I + Vx.
     AddIndex {
         vx: Register,
-    }
+    },
+
+    // Fx29 - LD F, Vx; Set I = location of sprite for digit Vx.
+    
 }
