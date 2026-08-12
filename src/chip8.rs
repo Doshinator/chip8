@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
+use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -248,6 +248,12 @@ impl Chip8 {
                 self.sound_timer.set(x);
                 Ok(())
             },
+            AddIndex { vx } => {
+                let x = self.registers.get(vx);
+                self.index = self.index.wrapping_add(x as u16);
+
+                Ok(())
+            }
         }
     }
 
@@ -964,6 +970,62 @@ mod chip8_execute_tests {
 
         assert_eq!(None, cpu.waiting_for_key);
     }
+
+    #[test]
+    fn execute_set_delay_timer() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 42);
+
+        cpu.execute(Instruction::SetDelayTimer {
+            vx: Register::VA,
+        })
+        .unwrap();
+
+        assert_eq!(42, cpu.delay_timer.get());
+    }
+
+    #[test]
+    fn execute_set_sound_timer() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 42);
+
+        cpu.execute(Instruction::SetSoundTimer {
+            vx: Register::VA,
+        }).unwrap();
+
+        assert_eq!(42, cpu.sound_timer.get());
+    }
+
+    #[test]
+    fn execute_add_index() {
+        let mut cpu = Chip8::new();
+
+        cpu.index = 0x300;
+        cpu.registers.set(Register::VA, 0x20);
+
+        cpu.execute(Instruction::AddIndex { 
+            vx: Register::VA 
+        })
+        .unwrap();
+
+        assert_eq!(0x320, cpu.index);
+    }
+
+    #[test]
+    fn execute_add_index_wraps() {
+        let mut cpu = Chip8::new();
+
+        cpu.index = 0xFFFF;
+        cpu.registers.set(Register::VA, 1);
+
+        cpu.execute(Instruction::AddIndex {
+            vx: Register::VA,
+        }).unwrap();
+
+        assert_eq!(0x0000, cpu.index);
+    }
 }
 
 #[cfg(test)]
@@ -1374,5 +1436,51 @@ use crate::{display::{HEIGHT, WIDTH}, registers::Register::{self, VA}};
         cpu.tick().unwrap();
 
         assert_eq!(Key::K5.index(), cpu.registers.get(VA) as usize);
+    }
+
+    #[test]
+    fn tick_executes_set_delay_timer() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 42);
+
+        cpu.memory[0x200] = 0xFA;
+        cpu.memory[0x201] = 0x15;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(42, cpu.delay_timer.get());
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_set_sound_timer() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 42);
+
+        cpu.memory[0x200] = 0xFA;
+        cpu.memory[0x201] = 0x18;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(42, cpu.sound_timer.get());
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_add_index() {
+        let mut cpu = Chip8::new();
+
+        cpu.index = 0x300;
+        cpu.registers.set(Register::VA, 0x20);
+
+        cpu.memory[0x200] = 0xFA;
+        cpu.memory[0x201] = 0x1E;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(0x320, cpu.index);
+        assert_eq!(0x202, cpu.pc);
     }
 }

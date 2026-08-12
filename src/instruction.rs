@@ -144,5 +144,9 @@ pub enum Instruction {
     // Fx18 - LD ST, Vx; Set sound timer = Vx.
     SetSoundTimer {
         vx: Register,
+    },
+    
+    AddIndex {
+        vx: Register,
     }
 }
