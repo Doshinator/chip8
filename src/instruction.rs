@@ -159,5 +159,10 @@ pub enum Instruction {
     // Fx33 - LD B, Vx; Store BCD representation of Vx in memory locations I, I+1, and I+2.
     StoreBCD {
         vx: Register,
-    }
+    },
+
+    // Fx55 - LD [I], Vx; Store registers V0 through Vx in memory starting at location I.
+    StoreRegisters {
+        vx: Register,
+    },
 }
