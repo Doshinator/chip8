@@ -265,7 +265,17 @@ impl Chip8 {
                 Ok(())
             },
             StoreBCD { vx } => {
-                
+                let x = self.registers.get(vx);
+
+                // extract the place-th of the u8 value. 123 = 1-hundreds 2-tens 3-ones
+                let hundreds = x / 100;
+                let tens = (x / 10) % 10;
+                let ones = x % 10;
+                let i = self.index as usize;
+
+                self.memory[i] = hundreds as u8;
+                self.memory[i + 1] = tens as u8;
+                self.memory[i + 2] = ones as u8;
                 Ok(())
             },
         }
