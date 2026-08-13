@@ -1057,7 +1057,8 @@ mod chip8_execute_tests {
 
         cpu.execute(Instruction::AddIndex {
             vx: Register::VA,
-        }).unwrap();
+        })
+        .unwrap();
 
         assert_eq!(0x0000, cpu.index);
     }
@@ -1070,9 +1071,46 @@ mod chip8_execute_tests {
 
         cpu.execute(Instruction::LoadFontSprite {
             vx: Register::VA,
-        }).unwrap();
+        })
+        .unwrap();
 
         assert_eq!(0x32, cpu.index);
+    }
+
+    #[test]
+    fn execute_store_bcd() {
+        let mut cpu = Chip8::new();
+        cpu.index = 0x300;
+        let i = cpu.index as usize;
+        
+        cpu.registers.set(Register::V0, 123);
+
+        cpu.execute(Instruction::StoreBCD {
+            vx: Register::V0
+        })
+        .unwrap();
+
+        assert_eq!(1, cpu.memory[i]);
+        assert_eq!(2, cpu.memory[i + 1]);
+        assert_eq!(3, cpu.memory[i + 2]);
+    }
+
+    #[test]
+    fn execute_storebcd_with_leading_zeroes() {
+        let mut cpu = Chip8::new();
+        cpu.index = 0x300;
+        let i = cpu.index as usize;
+
+        cpu.registers.set(Register::V0, 7);
+
+        cpu.execute(Instruction::StoreBCD {
+            vx: Register::V0
+        })
+        .unwrap();
+
+        assert_eq!(0, cpu.memory[i]);
+        assert_eq!(0, cpu.memory[i + 1]);
+        assert_eq!(7, cpu.memory[i + 2]);
     }
 }
 
