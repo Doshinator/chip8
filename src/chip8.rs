@@ -273,9 +273,9 @@ impl Chip8 {
                 let ones = x % 10;
                 let i = self.index as usize;
 
-                self.memory[i] = hundreds as u8;
-                self.memory[i + 1] = tens as u8;
-                self.memory[i + 2] = ones as u8;
+                self.memory[i] = hundreds;
+                self.memory[i + 1] = tens;
+                self.memory[i + 2] = ones;
                 Ok(())
             },
         }
@@ -1583,6 +1583,26 @@ use crate::{display::{HEIGHT, WIDTH}, registers::Register::{self, VA}};
         cpu.tick().unwrap();
 
         assert_eq!(0x032, cpu.index);
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_store_bcd() {
+        let mut cpu = Chip8::new();
+
+        // FA33 = FX33 with X = A
+        // Store BCD representation of VA at I, I+1, I+2.
+        cpu.memory[0x200] = 0xFA;
+        cpu.memory[0x201] = 0x33;
+
+        cpu.index = 0x300;
+        cpu.registers.set(Register::VA, 123);
+
+        cpu.tick().unwrap();
+
+        assert_eq!(1, cpu.memory[0x300]);
+        assert_eq!(2, cpu.memory[0x301]);
+        assert_eq!(3, cpu.memory[0x302]);
         assert_eq!(0x202, cpu.pc);
     }
 }
