@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadImmediate, LoadIndex, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
+use crate::{decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -25,7 +25,7 @@ pub struct Chip8 {
 
 impl Chip8 {
     pub fn new() -> Self {
-        Self {
+        let mut chip8 = Self {
             memory: [0; RAM_SIZE],
             registers: Registers::new(),
             
@@ -40,7 +40,11 @@ impl Chip8 {
             
             pc: 0x200,
             index: 0,
-        }
+        };
+
+        chip8.memory[..FONT.len()].copy_from_slice(&FONT);
+
+        chip8
     }
 
     // fetch op code
@@ -253,7 +257,10 @@ impl Chip8 {
                 self.index = self.index.wrapping_add(x as u16);
 
                 Ok(())
-            }
+            },
+            LoadFontSprite { vx } => {
+                todo!()
+            },
         }
     }
 

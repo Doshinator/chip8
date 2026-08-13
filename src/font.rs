@@ -1,4 +1,4 @@
-const FONT: [u8; 80] = [
+pub const FONT: [u8; 80] = [
     // 0
     0xF0, 0x90, 0x90, 0x90, 0xF0,
     // 1
