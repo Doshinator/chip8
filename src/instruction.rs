@@ -154,5 +154,10 @@ pub enum Instruction {
     // Fx29 - LD F, Vx; Set I = location of sprite for digit Vx.
     LoadFontSprite {
         vx: Register,
+    },
+
+    // Fx33 - LD B, Vx; Store BCD representation of Vx in memory locations I, I+1, and I+2.
+    StoreBCD {
+        vx: Register,
     }
 }
