@@ -109,7 +109,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                 0x15 => Ok(Instruction::SetDelayTimer { vx }),
                 0x18 => Ok(Instruction::SetSoundTimer { vx }),
                 0x1E => Ok(Instruction::AddIndex { vx }),
-                0x29 => todo!(),
+                0x29 => Ok(Instruction::LoadFontSprite { vx }),
                 0x33 => todo!(),
                 0x55 => todo!(),
                 0x65 => todo!(),

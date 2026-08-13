@@ -259,7 +259,10 @@ impl Chip8 {
                 Ok(())
             },
             LoadFontSprite { vx } => {
-                todo!()
+                let x = self.registers.get(vx);
+                self.index = x as u16 * 5;
+
+                Ok(())
             },
         }
     }
@@ -379,6 +382,17 @@ mod tests {
             cpu.registers.get(Register::VA),
             55
         )
+    }
+
+    #[test]
+    fn new_loads_font_into_memory() {
+        let cpu = Chip8::new();
+
+        assert_eq!(0xF0, cpu.memory[0x000]);
+        assert_eq!(0x90, cpu.memory[0x001]);
+        assert_eq!(0x90, cpu.memory[0x002]);
+        assert_eq!(0x90, cpu.memory[0x003]);
+        assert_eq!(0xF0, cpu.memory[0x004]);
     }
 }
 
@@ -1033,6 +1047,19 @@ mod chip8_execute_tests {
 
         assert_eq!(0x0000, cpu.index);
     }
+
+    #[test]
+    fn execute_load_font_sprite() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 0xA);
+
+        cpu.execute(Instruction::LoadFontSprite {
+            vx: Register::VA,
+        }).unwrap();
+
+        assert_eq!(0x32, cpu.index);
+    }
 }
 
 #[cfg(test)]
@@ -1488,6 +1515,22 @@ use crate::{display::{HEIGHT, WIDTH}, registers::Register::{self, VA}};
         cpu.tick().unwrap();
 
         assert_eq!(0x320, cpu.index);
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_load_font_sprite() {
+        let mut cpu = Chip8::new();
+
+        cpu.registers.set(Register::VA, 0xA);
+
+        // FX29 — LD F, VA
+        cpu.memory[0x200] = 0xFA;
+        cpu.memory[0x201] = 0x29;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(0x032, cpu.index);
         assert_eq!(0x202, cpu.pc);
     }
 }
