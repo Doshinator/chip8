@@ -1,7 +1,11 @@
 //!decode.rs
 use core::fmt;
 
-use crate::{decode::DecodeError::UnsupportedInstruction, instruction::Instruction, registers::Register::{self}};
+use crate::{
+    decode::DecodeError::UnsupportedInstruction,
+    instruction::Instruction,
+    registers::Register,
+};
 
 pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
     let instruction = (opcode >> 12) as u8;
@@ -41,6 +45,10 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             Ok(Instruction::SkipIfRegisterNotEqualImmediate { vx, value })
         },
         5 => {
+            if opcode & 0x000F != 0 {
+                return Err(DecodeError::UnsupportedInstruction(opcode));
+            }
+
             let (vx, vy) = decode_xy_register(opcode)?;
 
             Ok(Instruction::SkipIfRegistersEqual { vx, vy })

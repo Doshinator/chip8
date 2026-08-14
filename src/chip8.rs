@@ -1596,16 +1596,30 @@ use crate::{display::{HEIGHT, WIDTH}, registers::Register::{self, VA}};
         // First tick executes FX0A and enters waiting state.
         cpu.tick().unwrap();
 
+        assert_eq!(cpu.waiting_for_key, Some(VA));
+
+        // FX0A was fetched, so PC advanced once.
+        assert_eq!(cpu.pc, 0x202);
+
         // No key has been pressed yet.
+        cpu.tick().unwrap();
+
+        // CPU is waiting, so PC must not advance.
+        assert_eq!(cpu.pc, 0x202);
         assert_eq!(cpu.registers.get(VA), 0);
 
         // Now press K5.
         cpu.keypad.press(Key::K5);
 
-        // Second tick handles the waiting state.
         cpu.tick().unwrap();
 
         assert_eq!(Key::K5.index(), cpu.registers.get(VA) as usize);
+        // Waiting state should be cleared.
+        assert_eq!(cpu.waiting_for_key, None);
+
+        // PC still hasn't advanced because the waiting logic does not fetch
+        // another instruction on the key-press tick.
+        assert_eq!(cpu.pc, 0x202);
     }
 
     #[test]
