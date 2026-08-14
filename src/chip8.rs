@@ -279,7 +279,14 @@ impl Chip8 {
                 Ok(())
             },
             StoreRegisters { vx } => {
-                todo!()
+                // stores into memory values starting from register v0 -> vX where vX is one of 16 registers, starting at address index.
+                for i in 0..=Register::index(&vx) {
+                    let address = self.index as usize + i;
+                    let register = Register::from_index(i as u8)?;
+
+                    self.memory[address] = self.registers.get(register);
+                }
+                Ok(())
             },
         }
     }
