@@ -1122,6 +1122,28 @@ mod chip8_execute_tests {
         assert_eq!(0, cpu.memory[i + 1]);
         assert_eq!(7, cpu.memory[i + 2]);
     }
+
+    #[test]
+    fn execute_store_registers() {
+        let mut cpu = Chip8::new();
+
+        cpu.index = 0x300;
+
+        cpu.registers.set(Register::V0, 10);
+        cpu.registers.set(Register::V1, 20);
+        cpu.registers.set(Register::V2, 30);
+        cpu.registers.set(Register::V3, 40);
+
+        cpu.execute(Instruction::StoreRegisters {
+            vx: Register::V3,
+        }).unwrap();
+
+        assert_eq!(10, cpu.memory[0x300]);
+        assert_eq!(20, cpu.memory[0x301]);
+        assert_eq!(30, cpu.memory[0x302]);
+        assert_eq!(40, cpu.memory[0x303]);
+        assert_eq!(0, cpu.memory[0x304]);
+    }
 }
 
 #[cfg(test)]
@@ -1613,6 +1635,31 @@ use crate::{display::{HEIGHT, WIDTH}, registers::Register::{self, VA}};
         assert_eq!(1, cpu.memory[0x300]);
         assert_eq!(2, cpu.memory[0x301]);
         assert_eq!(3, cpu.memory[0x302]);
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_store_registers() {
+        let mut cpu = Chip8::new();
+
+        cpu.index = 0x300;
+
+        cpu.registers.set(Register::V0, 10);
+        cpu.registers.set(Register::V1, 20);
+        cpu.registers.set(Register::V2, 30);
+        cpu.registers.set(Register::V3, 40);
+
+        // F355 = LD [I], V3
+        cpu.memory[0x200] = 0xF3;
+        cpu.memory[0x201] = 0x55;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(10, cpu.memory[0x300]);
+        assert_eq!(20, cpu.memory[0x301]);
+        assert_eq!(30, cpu.memory[0x302]);
+        assert_eq!(40, cpu.memory[0x303]);
+
         assert_eq!(0x202, cpu.pc);
     }
 }
