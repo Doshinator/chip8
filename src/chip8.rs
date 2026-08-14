@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadRegisters, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
+use crate::{decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadRegisters, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfEqual, SkipIfEqualImmediate, SkipIfNotEqualImmediate, SkipIfNotPressed, SkipIfPressed, SneVxVy, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -78,6 +78,24 @@ impl Chip8 {
             Call { address } => {
                 self.stack.push(self.pc)?;
                 self.pc = address;
+                Ok(())
+            },
+            SkipIfEqualImmediate { vx, value } => {
+                if value == self.registers.get(vx) {
+                    self.pc += 2;
+                }
+                Ok(())
+            },
+            SkipIfNotEqualImmediate { vx, value } => {
+                if value != self.registers.get(vx) {
+                    self.pc += 2;
+                }
+                Ok(())
+            },
+            SkipIfEqual { vx, vy } => {
+                if self.registers.get(vx) == self.registers.get(vy) {
+                    self.pc += 2;
+                }
                 Ok(())
             },
             LoadImmediate { register, value } => {

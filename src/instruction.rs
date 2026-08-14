@@ -21,6 +21,24 @@ pub enum Instruction {
         address: u16,
     },
 
+    // 3xkk - SE Vx, byte; Skip next instruction if Vx = kk.
+    SkipIfEqualImmediate {
+        vx: Register,
+        value: u8,
+    },
+    
+    // 4xkk - SNE Vx, byte; Skip next instruction if Vx != kk.
+    SkipIfNotEqualImmediate {
+        vx: Register,
+        value: u8,
+    },
+
+    // 5xy0 - SE Vx, Vy; Skip next instruction if Vx = Vy.
+    SkipIfEqual {
+        vx: Register,
+        vy: Register,
+    },
+
     // 6xkk - LD Vx, byte - The interpreter puts the value kk into register Vx.
     LoadImmediate {
         register: Register,

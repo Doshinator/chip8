@@ -22,6 +22,29 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             let address = opcode & 0x0FFF;
             Ok(Instruction::Call { address })
         },
+        3 => {
+            let idx = ((opcode >> 8) & 0x0F) as u8;
+            let vx = Register::from_index(idx)
+                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
+
+            let value = (opcode & 0x00FF) as u8;
+
+            Ok(Instruction::SkipIfEqualImmediate { vx, value })
+        },
+        4 => {
+            let idx= ((opcode) >> 8 & 0x0F) as u8;
+            let vx = Register::from_index(idx)
+                .map_err(|_| UnsupportedInstruction(opcode))?;
+
+            let value = (opcode & 0x00FF) as u8;
+
+            Ok(Instruction::SkipIfNotEqualImmediate { vx, value })
+        },
+        5 => {
+            let (vx, vy) = decode_xy_register(opcode)?;
+
+            Ok(Instruction::SkipIfEqual { vx, vy })
+        },
         6 => {
             let register_index = ((opcode >> 8) as u8) & (0x0F);
             let value = (opcode & 0x00FF) as u8;
