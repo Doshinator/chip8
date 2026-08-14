@@ -29,7 +29,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
 
             let value = (opcode & 0x00FF) as u8;
 
-            Ok(Instruction::SkipIfEqualImmediate { vx, value })
+            Ok(Instruction::SkipIfRegisterEqualImmediate { vx, value })
         },
         4 => {
             let idx= ((opcode) >> 8 & 0x0F) as u8;
@@ -38,12 +38,12 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
 
             let value = (opcode & 0x00FF) as u8;
 
-            Ok(Instruction::SkipIfNotEqualImmediate { vx, value })
+            Ok(Instruction::SkipIfRegisterNotEqualImmediate { vx, value })
         },
         5 => {
             let (vx, vy) = decode_xy_register(opcode)?;
 
-            Ok(Instruction::SkipIfEqual { vx, vy })
+            Ok(Instruction::SkipIfRegistersEqual { vx, vy })
         },
         6 => {
             let register_index = ((opcode >> 8) as u8) & (0x0F);
@@ -80,7 +80,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
         9 => {
             let (vx, vy) = decode_xy_register(opcode)?;
             match opcode & 0x000F {
-                0 => Ok(Instruction::SneVxVy { vx, vy }),
+                0 => Ok(Instruction::SkipIfRegistersNotEqual { vx, vy }),
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }
             
@@ -113,10 +113,10 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
 
             match opcode & 0x00FF {
                 0x9E => {
-                    Ok(Instruction::SkipIfPressed { vx })
+                    Ok(Instruction::SkipIfKeyPressed { vx })
                 },
                 0xA1 => {
-                    Ok(Instruction::SkipIfNotPressed { vx })
+                    Ok(Instruction::SkipIfKeyNotPressed { vx })
                 },
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }

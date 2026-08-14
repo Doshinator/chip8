@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadRegisters, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfEqual, SkipIfEqualImmediate, SkipIfNotEqualImmediate, SkipIfNotPressed, SkipIfPressed, SneVxVy, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
+use crate::{decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadRegisters, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfKeyNotPressed, SkipIfKeyPressed, SkipIfRegisterEqualImmediate, SkipIfRegisterNotEqualImmediate, SkipIfRegistersEqual, SkipIfRegistersNotEqual, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -80,19 +80,19 @@ impl Chip8 {
                 self.pc = address;
                 Ok(())
             },
-            SkipIfEqualImmediate { vx, value } => {
+            SkipIfRegisterEqualImmediate { vx, value } => {
                 if value == self.registers.get(vx) {
                     self.pc += 2;
                 }
                 Ok(())
             },
-            SkipIfNotEqualImmediate { vx, value } => {
+            SkipIfRegisterNotEqualImmediate { vx, value } => {
                 if value != self.registers.get(vx) {
                     self.pc += 2;
                 }
                 Ok(())
             },
-            SkipIfEqual { vx, vy } => {
+            SkipIfRegistersEqual { vx, vy } => {
                 if self.registers.get(vx) == self.registers.get(vy) {
                     self.pc += 2;
                 }
@@ -188,7 +188,7 @@ impl Chip8 {
 
                 Ok(())
             },
-            SneVxVy { vx, vy } => {
+            SkipIfRegistersNotEqual { vx, vy } => {
                 let vx_val = self.registers.get(vx);
                 let vy_val = self.registers.get(vy);
 
@@ -230,7 +230,7 @@ impl Chip8 {
 
                 Ok(())
             },
-            SkipIfPressed { vx } => {
+            SkipIfKeyPressed { vx } => {
                 let x = self.registers.get(vx);
                 let key = Key::try_from(x)?;
                 
@@ -240,7 +240,7 @@ impl Chip8 {
 
                 Ok(())
             },
-            SkipIfNotPressed { vx } => {
+            SkipIfKeyNotPressed { vx } => {
                 let x = self.registers.get(vx);
                 let key = Key::try_from(x)?;
 
@@ -806,7 +806,7 @@ mod chip8_execute_tests {
         cpu.registers.set(Register::VB, 20);
         cpu.pc = 0x202;
 
-        cpu.execute(SneVxVy {
+        cpu.execute(SkipIfRegistersNotEqual {
             vx: Register::VA,
             vy: Register::VB,
         })
@@ -823,7 +823,7 @@ mod chip8_execute_tests {
         cpu.registers.set(Register::VB, 10);
         cpu.pc = 0x202;
 
-        cpu.execute(SneVxVy {
+        cpu.execute(SkipIfRegistersNotEqual {
             vx: Register::VA,
             vy: Register::VB,
         })
@@ -955,7 +955,7 @@ mod chip8_execute_tests {
         cpu.registers.set(Register::VA, 10);
         cpu.keypad.press(KA);
 
-        cpu.execute(Instruction::SkipIfPressed {
+        cpu.execute(Instruction::SkipIfKeyPressed {
             vx: Register::VA
         })
         .unwrap();
@@ -970,7 +970,7 @@ mod chip8_execute_tests {
 
         cpu.pc = 0x200;
 
-        cpu.execute(Instruction::SkipIfPressed {
+        cpu.execute(Instruction::SkipIfKeyPressed {
             vx: Register::VA
         })
         .unwrap();
@@ -985,7 +985,7 @@ mod chip8_execute_tests {
 
         cpu.pc = 0x200;
 
-        cpu.execute(Instruction::SkipIfNotPressed {
+        cpu.execute(Instruction::SkipIfKeyNotPressed {
             vx: Register::VA
         })
         .unwrap();
@@ -1002,7 +1002,7 @@ mod chip8_execute_tests {
         cpu.registers.set(Register::VA, 10);
         cpu.keypad.press(KA);
 
-        cpu.execute(Instruction::SkipIfNotPressed {
+        cpu.execute(Instruction::SkipIfKeyNotPressed {
             vx: Register::VA
         })
         .unwrap();
