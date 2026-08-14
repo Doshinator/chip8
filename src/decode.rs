@@ -112,7 +112,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
                 0x29 => Ok(Instruction::LoadFontSprite { vx }),
                 0x33 => Ok(Instruction::StoreBCD { vx }),
                 0x55 => Ok(Instruction::StoreRegisters { vx }),
-                0x65 => todo!(),
+                0x65 => Ok(Instruction::LoadRegisters { vx }),
                 _ => Err(DecodeError::UnsupportedInstruction(opcode))
             }
         }

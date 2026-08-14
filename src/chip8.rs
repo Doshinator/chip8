@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
+use crate::{decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadRegisters, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfNotPressed, SkipIfPressed, SneVxVy, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
 
 const RAM_SIZE: usize = 4096;
 pub struct Chip8 {
@@ -288,6 +288,16 @@ impl Chip8 {
                 }
                 Ok(())
             },
+            LoadRegisters { vx } => {
+                for i in 0..=Register::index(&vx) {
+                    let address = self.index as usize + i;
+                    let register = Register::from_index(i as u8)?;
+                    let value = self.memory[address];
+
+                    self.registers.set(register, value);
+                }
+                Ok(())                
+            }
         }
     }
 
@@ -1144,6 +1154,30 @@ mod chip8_execute_tests {
         assert_eq!(40, cpu.memory[0x303]);
         assert_eq!(0, cpu.memory[0x304]);
     }
+
+    #[test]
+    fn execute_load_registers() {
+        let mut cpu = Chip8::new();
+
+        cpu.index = 0x300;
+
+        cpu.memory[0x300] = 10;
+        cpu.memory[0x301] = 20;
+        cpu.memory[0x302] = 30;
+        cpu.memory[0x303] = 40;
+
+        cpu.execute(Instruction::LoadRegisters {
+            vx: Register::V3,
+        }).unwrap();
+
+        assert_eq!(10, cpu.registers.get(Register::V0));
+        assert_eq!(20, cpu.registers.get(Register::V1));
+        assert_eq!(30, cpu.registers.get(Register::V2));
+        assert_eq!(40, cpu.registers.get(Register::V3));
+
+        // V4 should not have been touched.
+        assert_eq!(0, cpu.registers.get(Register::V4));
+    }
 }
 
 #[cfg(test)]
@@ -1659,6 +1693,31 @@ use crate::{display::{HEIGHT, WIDTH}, registers::Register::{self, VA}};
         assert_eq!(20, cpu.memory[0x301]);
         assert_eq!(30, cpu.memory[0x302]);
         assert_eq!(40, cpu.memory[0x303]);
+
+        assert_eq!(0x202, cpu.pc);
+    }
+
+    #[test]
+    fn tick_executes_load_registers() {
+        let mut cpu = Chip8::new();
+
+        cpu.index = 0x300;
+
+        cpu.memory[0x300] = 10;
+        cpu.memory[0x301] = 20;
+        cpu.memory[0x302] = 30;
+        cpu.memory[0x303] = 40;
+
+        // FX65 — LD V0..V3, [I]
+        cpu.memory[0x200] = 0xF3;
+        cpu.memory[0x201] = 0x65;
+
+        cpu.tick().unwrap();
+
+        assert_eq!(10, cpu.registers.get(Register::V0));
+        assert_eq!(20, cpu.registers.get(Register::V1));
+        assert_eq!(30, cpu.registers.get(Register::V2));
+        assert_eq!(40, cpu.registers.get(Register::V3));
 
         assert_eq!(0x202, cpu.pc);
     }

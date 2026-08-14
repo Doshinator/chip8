@@ -165,4 +165,9 @@ pub enum Instruction {
     StoreRegisters {
         vx: Register,
     },
+
+    // Fx65 - LD Vx, [I]; Read registers V0 through Vx from memory starting at location I.
+    LoadRegisters {
+        vx: Register
+    }
 }
