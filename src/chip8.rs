@@ -98,13 +98,13 @@ impl Chip8 {
                 }
                 Ok(())
             },
-            LoadImmediate { register, value } => {
-                self.registers.set(register, value);
+            LoadImmediate { vx, value } => {
+                self.registers.set(vx, value);
                 Ok(())
             },
-            AddImmediate { register, value} => {
-                let curr_val = self.registers.get(register).wrapping_add(value);
-                self.registers.set(register, curr_val);
+            AddImmediate { vx, value} => {
+                let curr_val = self.registers.get(vx).wrapping_add(value);
+                self.registers.set(vx, curr_val);
                 Ok(())
             },
             SetVxVy { vx, vy } => {
@@ -424,7 +424,7 @@ mod tests {
     fn execute_load_immediate() {
         let mut cpu = Chip8::new();
         let instruction_load_immediate = Instruction::LoadImmediate { 
-            register: Register::VA, 
+            vx: Register::VA, 
             value: 55,
         };
 
@@ -495,7 +495,7 @@ mod chip8_execute_tests {
         
         cpu.registers.set(Register::VA, 10);
         cpu.execute(Instruction::AddImmediate { 
-            register: Register::VA, 
+            vx: Register::VA, 
             value: 255 })
             .unwrap();
         

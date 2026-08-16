@@ -187,7 +187,7 @@ mod tests {
         assert_eq!(
             instruction,
             Instruction::LoadImmediate {
-                register: Register::VA,
+                vx: Register::VA,
                 value: 5,
             }
         );
@@ -209,7 +209,7 @@ mod tests {
         let instruction = decode(0x7A55).unwrap();
         assert_eq!(
             Instruction::AddImmediate { 
-                register: Register::VA, 
+                vx: Register::VA, 
                 value: 0x55
             },
             instruction
