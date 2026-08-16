@@ -6,6 +6,8 @@ use rand::RngExt;
 use crate::{decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadRegisters, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfKeyNotPressed, SkipIfKeyPressed, SkipIfRegisterEqualImmediate, SkipIfRegisterNotEqualImmediate, SkipIfRegistersEqual, SkipIfRegistersNotEqual, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
 
 const RAM_SIZE: usize = 4096;
+const PROGRAM_START: usize = 0x200;
+
 pub struct Chip8 {
     memory: [u8; RAM_SIZE],
     registers: Registers,
@@ -45,6 +47,14 @@ impl Chip8 {
         chip8.memory[..FONT.len()].copy_from_slice(&FONT);
 
         chip8
+    }
+
+    pub fn load_rom(&mut self, rom: &[u8]) -> Result<(), Chip8Error> {
+        
+        for (i, value) in rom.iter().enumerate() {
+            self.memory[PROGRAM_START + i] = *value;
+        }
+        Ok(())
     }
 
     // fetch op code
@@ -445,6 +455,19 @@ mod tests {
         assert_eq!(0x90, cpu.memory[0x002]);
         assert_eq!(0x90, cpu.memory[0x003]);
         assert_eq!(0xF0, cpu.memory[0x004]);
+    }
+
+    #[test]
+    fn load_rom_test() {
+        let mut cpu = Chip8::new();
+        let rom: &[u8] = &[0x60, 0x0A, 0x61, 0x05];
+        
+        cpu.load_rom(rom).unwrap();
+
+        for (i, value) in rom.iter().enumerate() {
+            println!("{}", cpu.memory[PROGRAM_START + i]);
+            assert_eq!(*value, cpu.memory[PROGRAM_START + i]);
+        }
     }
 }
 
