@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadRegisters, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfKeyNotPressed, SkipIfKeyPressed, SkipIfRegisterEqualImmediate, SkipIfRegisterNotEqualImmediate, SkipIfRegistersEqual, SkipIfRegistersNotEqual, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
+use crate::{chip8::Chip8Error::RomTooLarge, decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadRegisters, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfKeyNotPressed, SkipIfKeyPressed, SkipIfRegisterEqualImmediate, SkipIfRegisterNotEqualImmediate, SkipIfRegistersEqual, SkipIfRegistersNotEqual, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
 
 const RAM_SIZE: usize = 4096;
 const PROGRAM_START: usize = 0x200;
@@ -40,7 +40,7 @@ impl Chip8 {
             
             waiting_for_key: None,
             
-            pc: 0x200,
+            pc: PROGRAM_START as u16,
             index: 0,
         };
 
@@ -50,7 +50,10 @@ impl Chip8 {
     }
 
     pub fn load_rom(&mut self, rom: &[u8]) -> Result<(), Chip8Error> {
-        
+        if PROGRAM_START + rom.len() > RAM_SIZE {
+            return Err(RomTooLarge)
+        }
+
         for (i, value) in rom.iter().enumerate() {
             self.memory[PROGRAM_START + i] = *value;
         }
@@ -352,12 +355,13 @@ impl Chip8 {
  * Custom Error
  * 
  */
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Chip8Error {
     Register(RegisterError),
     Stack(StackError),
     Decode(DecodeError),
     Keypad(KeypadError),
+    RomTooLarge,
 }
 
 impl From<RegisterError> for Chip8Error {
@@ -391,6 +395,7 @@ impl fmt::Display for Chip8Error {
             Chip8Error::Stack(e)    => write!(f, "stack error: {e}"),
             Chip8Error::Decode(e)   => write!(f, "decode error: {e}"),
             Chip8Error::Keypad(e) => write!(f, "keypad error: {e}"),
+            Chip8Error::RomTooLarge => write!(f, "rom too large error"),
         }
     }
 }
@@ -402,6 +407,7 @@ impl std::error::Error for Chip8Error {
             Chip8Error::Stack(e) => Some(e),
             Chip8Error::Decode(e) => Some(e),
             Chip8Error::Keypad(e) => Some(e),
+            Chip8Error::RomTooLarge => None,
         }
     }
 }
@@ -468,6 +474,18 @@ mod tests {
             println!("{}", cpu.memory[PROGRAM_START + i]);
             assert_eq!(*value, cpu.memory[PROGRAM_START + i]);
         }
+    }
+
+    #[test]
+    fn load_rom_rejects_rom_that_is_too_large() {
+        let mut cpu = Chip8::new();
+
+        let rom = vec![0; RAM_SIZE - PROGRAM_START + 1];
+
+        assert_eq!(
+            cpu.load_rom(&rom),
+            Err(Chip8Error::RomTooLarge)
+        );
     }
 }
 
