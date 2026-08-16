@@ -27,19 +27,13 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             Ok(Instruction::Call { address })
         },
         3 => {
-            let idx = ((opcode >> 8) & 0x0F) as u8;
-            let vx = Register::from_index(idx)
-                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
-
+            let vx = decode_x_register(opcode)?;
             let value = (opcode & 0x00FF) as u8;
 
             Ok(Instruction::SkipIfRegisterEqualImmediate { vx, value })
         },
         4 => {
-            let idx= ((opcode) >> 8 & 0x0F) as u8;
-            let vx = Register::from_index(idx)
-                .map_err(|_| UnsupportedInstruction(opcode))?;
-
+            let vx = decode_x_register(opcode)?;
             let value = (opcode & 0x00FF) as u8;
 
             Ok(Instruction::SkipIfRegisterNotEqualImmediate { vx, value })
@@ -54,21 +48,16 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             Ok(Instruction::SkipIfRegistersEqual { vx, vy })
         },
         6 => {
-            let register_index = ((opcode >> 8) as u8) & (0x0F);
+            let vx = decode_x_register(opcode)?;
             let value = (opcode & 0x00FF) as u8;
 
-            let register = Register::from_index(register_index)
-                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
-
-            Ok(Instruction::LoadImmediate { register, value })
+            Ok(Instruction::LoadImmediate { vx, value })
         },
         7 => {
-            let register_index = ((opcode >> 8) as u8) & (0x0F);
-            let register = Register::from_index(register_index)
-                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
+            let vx = decode_x_register(opcode)?;
             let value = (opcode & 0x00FF) as u8;
 
-            Ok(Instruction::AddImmediate { register, value })
+            Ok(Instruction::AddImmediate { vx, value })
         },
         8 => {
             let (vx, vy) = decode_xy_register(opcode)?;
@@ -102,9 +91,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             Ok(Instruction::JumpV0 { address })
         },
         0xC => {
-            let x = ((opcode >> 8) & 0x0F ) as u8;
-            let vx = Register::from_index(x)
-                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
+            let vx = decode_x_register(opcode)?;
             let kk = (opcode & 0x00FF) as u8;
 
             Ok(Instruction::RandomAndImmediate { vx, value: kk })
@@ -115,9 +102,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             Ok(Instruction::Draw { vx, vy, n})
         },
         0xE => {
-            let idx = ((opcode >> 8) & 0x0F) as u8;
-            let vx = Register::from_index(idx)
-                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
+            let vx = decode_x_register(opcode)?;
 
             match opcode & 0x00FF {
                 0x9E => {
@@ -130,9 +115,7 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
             }
         },
         0xF => {
-            let idx = ((opcode >> 8) & 0x0F) as u8;
-            let vx = Register::from_index(idx)
-                .map_err(|_| DecodeError::UnsupportedInstruction(opcode))?;
+            let vx = decode_x_register(opcode)?;
 
             match opcode & 0x00FF {
                 0x07 => Ok(Instruction::LoadVxDelayTimer { vx }),
@@ -149,6 +132,12 @@ pub fn decode(opcode: u16) -> Result<Instruction, DecodeError> {
         }
         _ => Err(DecodeError::UnsupportedInstruction(opcode)),
     }
+}
+
+fn decode_x_register(opcode: u16) -> Result<Register, DecodeError> {
+    let idx = ((opcode >> 8) & 0x0F) as u8;
+    Register::from_index(idx)
+        .map_err(|_| DecodeError::UnsupportedInstruction(opcode))
 }
 
 fn decode_xy_register(opcode: u16) -> Result<(Register, Register), DecodeError> {

@@ -43,14 +43,14 @@ pub enum Instruction {
 
     // 6xkk - LD Vx, byte - The interpreter puts the value kk into register Vx.
     LoadImmediate {
-        register: Register,
+        vx: Register,
         value: u8,
     },
 
     // 7xkk - ADD Vx, byte - Set Vx = Vx + kk.
     // Adds the value kk to the value of register Vx, then stores the result in Vx.
     AddImmediate {
-        register: Register,
+        vx: Register,
         value: u8,
     },
 
