@@ -3,7 +3,7 @@ use core::fmt;
 
 use rand::RngExt;
 
-use crate::{chip8::Chip8Error::RomTooLarge, decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadRegisters, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfKeyNotPressed, SkipIfKeyPressed, SkipIfRegisterEqualImmediate, SkipIfRegisterNotEqualImmediate, SkipIfRegistersEqual, SkipIfRegistersNotEqual, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
+use crate::{decode::{DecodeError, decode}, display::Display, font::FONT, instruction::Instruction::{self, AddImmediate, AddIndex, AddVxVy, AndVxVy, Call, ClearDisplay, Draw, JumpAddr, JumpV0, LoadFontSprite, LoadImmediate, LoadIndex, LoadRegisters, LoadVxDelayTimer, OrVxVy, RandomAndImmediate, Return, SetDelayTimer, SetSoundTimer, SetVxVy, ShlVx, ShrVx, SkipIfKeyNotPressed, SkipIfKeyPressed, SkipIfRegisterEqualImmediate, SkipIfRegisterNotEqualImmediate, SkipIfRegistersEqual, SkipIfRegistersNotEqual, StoreBCD, StoreRegisters, SubVxVy, SubnVxVy, WaitForKeyPress, XOrVxVy}, keypad::{Key, Keypad, KeypadError}, registers::{Register, RegisterError, Registers}, stack::{Stack, StackError}, timer::Timer};
 
 const RAM_SIZE: usize = 4096;
 const PROGRAM_START: usize = 0x200;
@@ -51,12 +51,12 @@ impl Chip8 {
 
     pub fn load_rom(&mut self, rom: &[u8]) -> Result<(), Chip8Error> {
         if PROGRAM_START + rom.len() > RAM_SIZE {
-            return Err(RomTooLarge)
+            return Err(Chip8Error::RomTooLarge)
         }
 
-        for (i, value) in rom.iter().enumerate() {
-            self.memory[PROGRAM_START + i] = *value;
-        }
+        self.memory[PROGRAM_START..PROGRAM_START + rom.len()]
+            .copy_from_slice(rom);
+
         Ok(())
     }
 
