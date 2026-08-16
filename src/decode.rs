@@ -263,4 +263,235 @@ mod tests {
             instruction
         );
     }
+
+    #[test]
+    fn decode_clear_display() {
+        assert_eq!(
+            decode(0x00E0).unwrap(),
+            Instruction::ClearDisplay
+        );
+    }
+
+    #[test]
+    fn decode_return() {
+        assert_eq!(
+            decode(0x00EE).unwrap(),
+            Instruction::Return
+        );
+    }
+
+    #[test]
+    fn decode_call() {
+        assert_eq!(
+            decode(0x2345).unwrap(),
+            Instruction::Call {
+                address: 0x345
+            }
+        );
+    }
+
+    #[test]
+    fn decode_skip_if_register_equal_immediate() {
+        assert_eq!(
+            decode(0x3A42).unwrap(),
+            Instruction::SkipIfRegisterEqualImmediate {
+                vx: Register::VA,
+                value: 0x42,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_skip_if_register_not_equal_immediate() {
+        assert_eq!(
+            decode(0x4A42).unwrap(),
+            Instruction::SkipIfRegisterNotEqualImmediate {
+                vx: Register::VA,
+                value: 0x42,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_skip_if_registers_equal() {
+        assert_eq!(
+            decode(0x5AB0).unwrap(),
+            Instruction::SkipIfRegistersEqual {
+                vx: Register::VA,
+                vy: Register::VB,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_skip_if_registers_equal_rejects_nonzero_nibble() {
+        assert_eq!(
+            decode(0x5AB1),
+            Err(DecodeError::UnsupportedInstruction(0x5AB1))
+        );
+    }
+
+    #[test]
+    fn decode_skip_if_registers_not_equal() {
+        assert_eq!(
+            decode(0x9AB0).unwrap(),
+            Instruction::SkipIfRegistersNotEqual {
+                vx: Register::VA,
+                vy: Register::VB,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_load_index() {
+        assert_eq!(
+            decode(0xA345).unwrap(),
+            Instruction::LoadIndex {
+                address: 0x345,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_jump_v0() {
+        assert_eq!(
+            decode(0xB345).unwrap(),
+            Instruction::JumpV0 {
+                address: 0x345,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_random_and_immediate() {
+        assert_eq!(
+            decode(0xCA55).unwrap(),
+            Instruction::RandomAndImmediate {
+                vx: Register::VA,
+                value: 0x55,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_draw() {
+        assert_eq!(
+            decode(0xDAB5).unwrap(),
+            Instruction::Draw {
+                vx: Register::VA,
+                vy: Register::VB,
+                n: 5,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_skip_if_key_pressed() {
+        assert_eq!(
+            decode(0xEA9E).unwrap(),
+            Instruction::SkipIfKeyPressed {
+                vx: Register::VA,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_skip_if_key_not_pressed() {
+        assert_eq!(
+            decode(0xEAA1).unwrap(),
+            Instruction::SkipIfKeyNotPressed {
+                vx: Register::VA,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_load_vx_delay_timer() {
+        assert_eq!(
+            decode(0xFA07).unwrap(),
+            Instruction::LoadVxDelayTimer {
+                vx: Register::VA,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_wait_for_key_press() {
+        assert_eq!(
+            decode(0xFA0A).unwrap(),
+            Instruction::WaitForKeyPress {
+                vx: Register::VA,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_set_delay_timer() {
+        assert_eq!(
+            decode(0xFA15).unwrap(),
+            Instruction::SetDelayTimer {
+                vx: Register::VA,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_set_sound_timer() {
+        assert_eq!(
+            decode(0xFA18).unwrap(),
+            Instruction::SetSoundTimer {
+                vx: Register::VA,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_add_index() {
+        assert_eq!(
+            decode(0xFA1E).unwrap(),
+            Instruction::AddIndex {
+                vx: Register::VA,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_load_font_sprite() {
+        assert_eq!(
+            decode(0xFA29).unwrap(),
+            Instruction::LoadFontSprite {
+                vx: Register::VA,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_store_bcd() {
+        assert_eq!(
+            decode(0xFA33).unwrap(),
+            Instruction::StoreBCD {
+                vx: Register::VA,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_store_registers() {
+        assert_eq!(
+            decode(0xFA55).unwrap(),
+            Instruction::StoreRegisters {
+                vx: Register::VA,
+            }
+        );
+    }
+
+    #[test]
+    fn decode_load_registers() {
+        assert_eq!(
+            decode(0xFA65).unwrap(),
+            Instruction::LoadRegisters {
+                vx: Register::VA,
+            }
+        );
+    }
 }
