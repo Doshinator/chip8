@@ -487,6 +487,26 @@ mod tests {
             Err(Chip8Error::RomTooLarge)
         );
     }
+
+    #[test]
+    fn executes_rom() {
+        let rom = [
+            0x60, 0x0A,
+            0x61, 0x05,
+            0x80, 0x14,
+        ];
+
+        let mut cpu = Chip8::new();
+
+        cpu.load_rom(&rom).unwrap();
+
+        cpu.tick().unwrap();
+        cpu.tick().unwrap();
+        cpu.tick().unwrap();
+
+        assert_eq!(cpu.registers.get(Register::V0), 15);
+        assert_eq!(cpu.registers.get(Register::V1), 5);
+    }
 }
 
 #[cfg(test)]

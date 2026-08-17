@@ -7,11 +7,10 @@ fn main() {
 
     let mut emulator = Chip8::new();
 
-    emulator
-        .load_rom(&rom)
-        .expect("failed to open ROM");
+    emulator.load_rom(&rom).expect("failed to open ROM");
 
-    loop {
+    for _ in 0..100 {
+        // println!("PC: {:#X}", emulator.pc);
         emulator.tick().expect("CHIP-8 execution failed");
     }
 }
