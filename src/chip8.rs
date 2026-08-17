@@ -507,6 +507,35 @@ mod tests {
         assert_eq!(cpu.registers.get(Register::V0), 15);
         assert_eq!(cpu.registers.get(Register::V1), 5);
     }
+
+    #[test]
+    fn executes_rom_with_jump() {
+        let rom: [u8; 4] = [
+            0x60, 0x0A, // 600A = LD V0, 10
+            0x12, 0x00, // 1200 = JP 0x200
+        ];
+
+        let mut cpu = Chip8::new();
+
+        cpu.load_rom(&rom).unwrap();
+
+        // Execute LD V0, 10
+        cpu.tick().unwrap();
+
+        assert_eq!(cpu.registers.get(Register::V0), 10);
+        assert_eq!(cpu.pc, 0x202);
+
+        // Execute JP 0x200
+        cpu.tick().unwrap();
+
+        assert_eq!(cpu.pc, 0x200);
+
+        // Execute LD V0, 10 again
+        cpu.tick().unwrap();
+
+        assert_eq!(cpu.registers.get(Register::V0), 10);
+        assert_eq!(cpu.pc, 0x202);
+    }
 }
 
 #[cfg(test)]
