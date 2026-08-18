@@ -541,6 +541,28 @@ mod tests {
         assert_eq!(cpu.registers.get(Register::V0), 10);
         assert_eq!(cpu.pc, 0x202);
     }
+
+    #[test]
+    fn tick_timers_decrements_both_timers() {
+       let mut cpu = Chip8::new();
+       cpu.delay_timer.set(5);
+       cpu.sound_timer.set(3);
+
+       cpu.tick_timers();
+
+       assert_eq!(4, cpu.delay_timer.get());
+       assert_eq!(2, cpu.sound_timer.get());
+    }
+
+    #[test]
+    fn tick_timers_does_not_underflow() {
+       let mut cpu = Chip8::new();
+
+       cpu.tick_timers();
+
+       assert_eq!(0, cpu.delay_timer.get());
+       assert_eq!(0, cpu.sound_timer.get());
+    }
 }
 
 #[cfg(test)]
