@@ -60,6 +60,11 @@ impl Chip8 {
         Ok(())
     }
 
+    pub fn tick_timers(&mut self) {
+        self.delay_timer.tick();
+        self.sound_timer.tick();
+    }
+
     // fetch op code
     fn fetch(&mut self) -> u16 {
         let high_byte = self.memory[self.pc as usize] as u16;
