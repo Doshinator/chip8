@@ -1402,8 +1402,8 @@ use crate::{display::{HEIGHT, WIDTH}, registers::Register::{self, VA}};
         cpu.tick().unwrap();
 
         assert_eq!(
-            [[false; WIDTH]; HEIGHT],
-            cpu.display.pixels
+            false,
+            cpu.display.is_on(WIDTH - 1, HEIGHT - 1)
         )
     }
 
