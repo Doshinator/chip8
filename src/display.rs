@@ -4,7 +4,7 @@ pub const WIDTH: usize = 64;
 pub const HEIGHT: usize = 32;
 
 pub struct Display {
-    pub pixels: [[bool; WIDTH];HEIGHT],
+    pixels: [[bool; WIDTH];HEIGHT],
 }
 
 impl Display {
