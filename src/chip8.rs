@@ -77,6 +77,10 @@ impl Chip8 {
         op
     }
 
+    pub fn display(&self) -> &Display {
+        &self.display
+    }
+
     // execute instructions
     fn execute(&mut self, instruction: Instruction) -> Result<(), Chip8Error> {
         match instruction {
