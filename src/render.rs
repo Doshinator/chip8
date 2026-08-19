@@ -45,6 +45,8 @@ impl Render {
 
 
 fn render(display: &Display, buffer: &mut [u32]) {
+    buffer.fill(0);
+
     for y in 0..32 {
         for x in 0..64 {
             if display.is_on(x, y) {
