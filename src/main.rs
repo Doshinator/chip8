@@ -7,11 +7,20 @@ const TIMER_HZ: u64 = 60;
 const FRAME_HZ: u64 = 60;
 
 fn main() {
-    println!("CHIP-8 emulator");
-
     let rom = std::fs::read("roms/ibm.ch8")
         .expect("failed to read ROM");
 
+    let mut emulator = Chip8::new();
+    emulator
+        .load_rom(&rom)
+        .expect("failed to load ROM");
+
+    let mut renderer = Render::new();
+
+    run_loop(&mut emulator, &mut renderer);
+}
+
+fn run_loop(emulator: &mut Chip8, renderer: &mut Render) {
     let cpu_interval = Duration::from_secs_f64(1.0 / CPU_HZ as f64);
     let timer_interval = Duration::from_secs_f64(1.0 / TIMER_HZ as f64);
     let frame_interval = Duration::from_secs_f64(1.0 / FRAME_HZ as f64);
@@ -19,14 +28,6 @@ fn main() {
     let mut last_cpu_tick = Instant::now();
     let mut last_timer_tick = Instant::now();
     let mut last_frame = Instant::now();
-
-    let mut emulator = Chip8::new();
-
-    emulator
-        .load_rom(&rom)
-        .expect("failed to load ROM");
-
-    let mut renderer = Render::new();
 
     while renderer.is_open() {
         let now = Instant::now();
