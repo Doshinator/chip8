@@ -7,3 +7,4 @@ pub mod display;
 pub mod keypad;
 pub mod timer;
 pub mod font;
+pub mod render;

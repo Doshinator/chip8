@@ -51,6 +51,11 @@ impl Display {
 
         collision
     }
+
+    // temp fn for testing
+    pub fn set_pixel(&mut self, x: usize, y: usize, value: bool) {
+        self.pixels[y][x] = value;
+    }
 }
 
 
