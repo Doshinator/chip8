@@ -8,6 +8,10 @@ use minifb::Key::{
 
 use crate::keypad::Key::{self, K0, K1, K2, K3, K4, K5, K6, K7, K8, K9, KA, KB, KC, KD, KE, KF};
 
+pub struct Input {
+    
+}
+
 pub fn map_key(key: minifb::Key) -> Option<Key> {
     match key {
         Key1 => Some(K1),

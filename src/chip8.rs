@@ -357,6 +357,14 @@ impl Chip8 {
 
         Ok(())
     }
+
+    pub fn press_key(&mut self, key: Key) {
+        self.keypad.press(key);
+    }
+
+    pub fn release_key(&mut self, key: Key) {
+        self.keypad.release(key);
+    }
 }
 
 /**
@@ -1873,5 +1881,31 @@ use crate::{display::{HEIGHT, WIDTH}, registers::Register::{self, VA}};
         assert_eq!(40, cpu.registers.get(Register::V3));
 
         assert_eq!(0x202, cpu.pc);
+    }
+}
+
+#[cfg(test)]
+mod chip8_keypad_test {
+    use crate::{chip8::Chip8, keypad::Key};
+
+    #[test]
+    fn press_key_updates_keypad() {
+        let mut cpu = Chip8::new();
+
+        cpu.press_key(Key::K4);
+
+        assert!(cpu.keypad.is_pressed(Key::K4));
+    }
+
+    #[test]
+    fn release_key_updates_keypad() {
+        let mut cpu = Chip8::new();
+
+        cpu.press_key(Key::K4);
+        assert!(cpu.keypad.is_pressed(Key::K4));
+
+        cpu.release_key(Key::K4);
+
+        assert!(!cpu.keypad.is_pressed(Key::K4));
     }
 }

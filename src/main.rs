@@ -7,7 +7,7 @@ const TIMER_HZ: u64 = 60;
 const FRAME_HZ: u64 = 60;
 
 fn main() {
-    let rom = std::fs::read("roms/corax+.ch8")
+    let rom = std::fs::read("roms/ibm.ch8")
         .expect("failed to read ROM");
 
     let mut emulator = Chip8::new();
@@ -31,6 +31,9 @@ fn run_loop(emulator: &mut Chip8, renderer: &mut Render) {
 
     while renderer.is_open() {
         let now = Instant::now();
+
+        let keys = renderer.pressed_keys();
+        println!("{:?}", keys);
 
         // Run CHIP-8 instructions at 500 Hz.
         while now.duration_since(last_cpu_tick) >= cpu_interval {
