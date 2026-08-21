@@ -11,7 +11,7 @@ const TIMER_HZ: u64 = 60;
 const FRAME_HZ: u64 = 60;
 
 fn main() {
-    let rom = std::fs::read("roms/ibm.ch8")
+    let rom = std::fs::read("roms/test.ch8")
         .expect("failed to read ROM");
 
     let mut emulator = Chip8::new();
