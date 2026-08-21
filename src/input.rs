@@ -1,4 +1,4 @@
-//! src/input.rs
+//!src/input.rs
 
 use minifb::Key::{
     A, C, D, E, F,
@@ -6,21 +6,12 @@ use minifb::Key::{
     Q, R, S, V, W, X, Z,
 };
 
-use crate::{
-    chip8::Chip8,
-    keypad::Key::{
-        self, K0, K1, K2, K3,
-        K4, K5, K6, K7,
-        K8, K9, KA, KB,
-        KC, KD, KE, KF,
-    },
-};
+use crate::{chip8::Chip8, keypad::Key::{self, K0, K1, K2, K3, K4, K5, K6, K7, K8, K9, KA, KB, KC, KD, KE, KF}};
 
 pub struct Input;
 
 impl Input {
     pub fn update(window: &minifb::Window, emulator: &mut Chip8) {
-        // Start by treating every CHIP-8 key as released.
         for key in [
             K0, K1, K2, K3,
             K4, K5, K6, K7,
@@ -29,14 +20,12 @@ impl Input {
         ] {
             emulator.release_key(key);
         }
-
-        // Press the CHIP-8 keys corresponding to
-        // the physical keys currently being held down.
         for key in window.get_keys() {
             if let Some(chip8_key) = map_key(key) {
                 emulator.press_key(chip8_key);
-            }
+            } 
         }
+
     }
 }
 
@@ -67,7 +56,7 @@ pub fn map_key(key: minifb::Key) -> Option<Key> {
 }
 
 #[cfg(test)]
-mod input_tests {
+pub mod input_tests {
     use super::*;
     use minifb::Key as MiniKey;
 
