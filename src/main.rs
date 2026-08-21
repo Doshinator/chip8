@@ -12,8 +12,15 @@ const FRAME_HZ: u64 = 60;
 const MAX_CPU_TICKS_PER_LOOP: u32 = 10;
 
 fn main() {
-    let rom = std::fs::read("roms/superpong.ch8")
-        .expect("failed to read ROM");
+    // cli arg
+    let rom_path = std::env::args()
+        .nth(1)
+        .expect("usage: chip8 <rom>");
+    
+    let rom = std::fs::read(&rom_path)
+        .unwrap_or_else(|e| {
+            panic!("failed to read ROM '{rom_path}': {e}");
+        });
 
     let mut emulator = Chip8::new();
 
