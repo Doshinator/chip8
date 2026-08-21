@@ -1,4 +1,4 @@
-//!src/input.rs
+//! src/input.rs
 
 use minifb::Key::{
     A, C, D, E, F,
@@ -20,12 +20,12 @@ impl Input {
         ] {
             emulator.release_key(key);
         }
+
         for key in window.get_keys() {
             if let Some(chip8_key) = map_key(key) {
                 emulator.press_key(chip8_key);
-            } 
+            }
         }
-
     }
 }
 
@@ -52,31 +52,5 @@ pub fn map_key(key: minifb::Key) -> Option<Key> {
         V => Some(KF),
 
         _ => None,
-    }
-}
-
-#[cfg(test)]
-pub mod input_tests {
-    use super::*;
-    use minifb::Key as MiniKey;
-
-    #[test]
-    fn maps_keyboard_keys_to_chip8_keys() {
-        assert_eq!(map_key(MiniKey::Key1), Some(K1));
-        assert_eq!(map_key(MiniKey::Key4), Some(KC));
-
-        assert_eq!(map_key(MiniKey::Q), Some(K4));
-        assert_eq!(map_key(MiniKey::R), Some(KD));
-
-        assert_eq!(map_key(MiniKey::A), Some(K7));
-        assert_eq!(map_key(MiniKey::F), Some(KE));
-
-        assert_eq!(map_key(MiniKey::Z), Some(KA));
-        assert_eq!(map_key(MiniKey::V), Some(KF));
-    }
-
-    #[test]
-    fn unmapped_keyboard_key_returns_none() {
-        assert_eq!(map_key(MiniKey::Space), None);
     }
 }

@@ -1,6 +1,10 @@
 use std::time::{Duration, Instant};
 
-use chip8::{chip8::Chip8, render::Render};
+use chip8::{
+    chip8::Chip8,
+    input::Input,
+    render::Render,
+};
 
 const CPU_HZ: u64 = 500;
 const TIMER_HZ: u64 = 60;
@@ -11,6 +15,7 @@ fn main() {
         .expect("failed to read ROM");
 
     let mut emulator = Chip8::new();
+
     emulator
         .load_rom(&rom)
         .expect("failed to load ROM");
@@ -33,7 +38,7 @@ fn run_loop(emulator: &mut Chip8, renderer: &mut Render) {
         let now = Instant::now();
 
         // Update CHIP-8 keypad from physical keyboard.
-        renderer.update_input(emulator);
+        Input::update(renderer.window(), emulator);
 
         // Run CHIP-8 instructions at 500 Hz.
         while now.duration_since(last_cpu_tick) >= cpu_interval {

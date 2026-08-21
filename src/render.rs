@@ -1,14 +1,10 @@
-//!render.rs
-use crate::{
-    chip8::Chip8,
-    display::Display,
-    input::Input,
-};
+//! src/render.rs
+
+use crate::display::Display;
 use minifb::{Window, WindowOptions};
 
 const MINIFB_WIDTH: usize = 640;
 const MINIFB_HEIGHT: usize = 320;
-
 
 pub struct Render {
     window: Window,
@@ -41,16 +37,15 @@ impl Render {
             )
             .expect("failed to update window");
     }
-    
+
     pub fn is_open(&self) -> bool {
         self.window.is_open()
     }
 
-    pub fn update_input(&self, emulator: &mut Chip8) {
-        Input::update(&self.window, emulator);
+    pub fn window(&self) -> &Window {
+        &self.window
     }
 }
-
 
 fn render(display: &Display, buffer: &mut [u32]) {
     buffer.fill(0);
