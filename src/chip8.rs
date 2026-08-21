@@ -365,6 +365,10 @@ impl Chip8 {
     pub fn release_key(&mut self, key: Key) {
         self.keypad.release(key);
     }
+
+    pub fn is_key_pressed(&self, key: Key) -> bool {
+        self.keypad.is_pressed(key)
+    }
 }
 
 /**

@@ -32,8 +32,8 @@ fn run_loop(emulator: &mut Chip8, renderer: &mut Render) {
     while renderer.is_open() {
         let now = Instant::now();
 
-        let keys = renderer.pressed_keys();
-        println!("{:?}", keys);
+        // Update CHIP-8 keypad from physical keyboard.
+        renderer.update_input(emulator);
 
         // Run CHIP-8 instructions at 500 Hz.
         while now.duration_since(last_cpu_tick) >= cpu_interval {

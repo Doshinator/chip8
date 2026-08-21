@@ -1,5 +1,9 @@
 //!render.rs
-use crate::display::Display;
+use crate::{
+    chip8::Chip8,
+    display::Display,
+    input::Input,
+};
 use minifb::{Window, WindowOptions};
 
 const MINIFB_WIDTH: usize = 640;
@@ -42,8 +46,8 @@ impl Render {
         self.window.is_open()
     }
 
-    pub fn pressed_keys(&self) -> Vec<minifb::Key> {
-        self.window.get_keys()
+    pub fn update_input(&self, emulator: &mut Chip8) {
+        Input::update(&self.window, emulator);
     }
 }
 
