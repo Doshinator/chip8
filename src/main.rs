@@ -9,9 +9,10 @@ use chip8::{
 const CPU_HZ: u64 = 500;
 const TIMER_HZ: u64 = 60;
 const FRAME_HZ: u64 = 60;
+const MAX_CPU_TICKS_PER_LOOP: u32 = 10;
 
 fn main() {
-    let rom = std::fs::read("roms/test.ch8")
+    let rom = std::fs::read("roms/superpong.ch8")
         .expect("failed to read ROM");
 
     let mut emulator = Chip8::new();
@@ -36,30 +37,30 @@ fn run_loop(emulator: &mut Chip8, renderer: &mut Render) {
 
     while renderer.is_open() {
         let now = Instant::now();
+        let mut cpu_ticks = 0;
 
         // Update CHIP-8 keypad from physical keyboard.
         Input::update(renderer.window(), emulator);
 
         // Run CHIP-8 instructions at 500 Hz.
-        while now.duration_since(last_cpu_tick) >= cpu_interval {
+        while now.duration_since(last_cpu_tick) >= cpu_interval && cpu_ticks < MAX_CPU_TICKS_PER_LOOP {
             emulator
                 .tick()
                 .expect("CHIP-8 execution failed");
 
             last_cpu_tick += cpu_interval;
+            cpu_ticks += 1;
         }
 
         // Update CHIP-8 timers at 60 Hz.
         while now.duration_since(last_timer_tick) >= timer_interval {
             emulator.tick_timers();
-
             last_timer_tick += timer_interval;
         }
 
         // Render the display at 60 FPS.
         if now.duration_since(last_frame) >= frame_interval {
             renderer.draw(emulator.display());
-
             last_frame += frame_interval;
         }
     }

@@ -320,7 +320,7 @@ impl Chip8 {
             },
             StoreRegisters { vx } => {
                 // stores into memory values starting from register v0 -> vX where vX is one of 16 registers, starting at address index.
-                for i in 0..=Register::index(&vx) {
+                for i in 0..=Register::index(vx) {
                     let address = self.index as usize + i;
                     let register = Register::from_index(i as u8)?;
 
@@ -329,7 +329,7 @@ impl Chip8 {
                 Ok(())
             },
             LoadRegisters { vx } => {
-                for i in 0..=Register::index(&vx) {
+                for i in 0..=Register::index(vx) {
                     let address = self.index as usize + i;
                     let register = Register::from_index(i as u8)?;
                     let value = self.memory[address];

@@ -47,7 +47,7 @@ pub enum Register {
 }
 
 impl Register {
-    pub fn index(&self) -> usize {
+    pub fn index(self) -> usize {
         match self {
             Register::V0 => 0,
             Register::V1 => 1,
