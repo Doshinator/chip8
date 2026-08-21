@@ -2,6 +2,8 @@
 
 A CHIP-8 emulator written in Rust.
 
+![Pong screenshot](pictures/pong.png)
+
 ## Status
 
 The CHIP-8 instruction set and core emulator functionality are implemented. The emulator can load and execute CHIP-8 ROMs and has been tested with working games and test ROMs. This project is considered complete as a CHIP-8 emulator.
